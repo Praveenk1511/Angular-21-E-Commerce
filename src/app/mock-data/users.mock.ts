@@ -1,0 +1,148 @@
+import type { User } from '@core/models';
+
+/**
+ * User seed records.
+ *
+ * Every role and status combination that matters is represented, so admin screens can
+ * be built against suspended accounts and pending invitations rather than only the
+ * happy path.
+ *
+ * Note the absence of any credential field. Passwords, tokens and sessions belong to
+ * the authentication phase; putting even a fake password hash here would invite
+ * someone to build a login against it.
+ *
+ * `orderCount` is stored rather than derived because a real user service would cache
+ * it — the orders collection here is a sample, not a complete history.
+ */
+export const USER_SEEDS: readonly User[] = [
+  {
+    id: 'usr-1001',
+    email: 'harriet.vance@example.com',
+    firstName: 'Harriet',
+    lastName: 'Vance',
+    role: 'customer',
+    status: 'active',
+    phone: '+44 7700 900142',
+    createdAt: '2024-02-11T14:22:00.000Z',
+    lastSeenAt: '2026-08-19T08:41:00.000Z',
+    orderCount: 14,
+    marketingOptIn: true,
+  },
+  {
+    id: 'usr-1002',
+    email: 'declan.moore@example.com',
+    firstName: 'Declan',
+    lastName: 'Moore',
+    role: 'customer',
+    status: 'active',
+    phone: '+44 7700 900318',
+    createdAt: '2024-06-30T09:05:00.000Z',
+    lastSeenAt: '2026-08-20T19:12:00.000Z',
+    orderCount: 6,
+    marketingOptIn: false,
+  },
+  {
+    id: 'usr-1003',
+    email: 'priya.raman@example.com',
+    firstName: 'Priya',
+    lastName: 'Raman',
+    role: 'customer',
+    status: 'active',
+    phone: null,
+    createdAt: '2025-01-18T16:48:00.000Z',
+    lastSeenAt: '2026-08-14T11:03:00.000Z',
+    orderCount: 3,
+    marketingOptIn: true,
+  },
+  {
+    id: 'usr-1004',
+    email: 'tomas.eriksen@example.com',
+    firstName: 'Tomas',
+    lastName: 'Eriksen',
+    role: 'customer',
+    status: 'suspended',
+    phone: '+44 7700 900677',
+    createdAt: '2025-03-22T10:30:00.000Z',
+    lastSeenAt: '2026-05-02T13:27:00.000Z',
+    orderCount: 2,
+    marketingOptIn: false,
+  },
+  {
+    id: 'usr-1005',
+    email: 'nadia.okafor@example.com',
+    firstName: 'Nadia',
+    lastName: 'Okafor',
+    role: 'customer',
+    status: 'active',
+    phone: '+44 7700 900904',
+    createdAt: '2026-04-07T07:15:00.000Z',
+    lastSeenAt: '2026-08-21T06:58:00.000Z',
+    orderCount: 1,
+    marketingOptIn: true,
+  },
+  {
+    id: 'usr-1006',
+    email: 'joel.whitaker@example.com',
+    firstName: 'Joel',
+    lastName: 'Whitaker',
+    role: 'customer',
+    status: 'invited',
+    phone: null,
+    createdAt: '2026-08-12T12:00:00.000Z',
+    lastSeenAt: null,
+    orderCount: 0,
+    marketingOptIn: false,
+  },
+  {
+    id: 'usr-2001',
+    email: 'ruth.abara@lumenstore.example',
+    firstName: 'Ruth',
+    lastName: 'Abara',
+    role: 'staff',
+    status: 'active',
+    phone: '+44 20 7946 0731',
+    createdAt: '2024-01-08T08:00:00.000Z',
+    lastSeenAt: '2026-08-21T07:30:00.000Z',
+    orderCount: 0,
+    marketingOptIn: false,
+  },
+  {
+    id: 'usr-2002',
+    email: 'martin.lowe@lumenstore.example',
+    firstName: 'Martin',
+    lastName: 'Lowe',
+    role: 'staff',
+    status: 'active',
+    phone: '+44 20 7946 0288',
+    createdAt: '2024-09-16T08:00:00.000Z',
+    lastSeenAt: '2026-08-18T16:44:00.000Z',
+    orderCount: 0,
+    marketingOptIn: false,
+  },
+  {
+    id: 'usr-2003',
+    email: 'claire.bell@lumenstore.example',
+    firstName: 'Claire',
+    lastName: 'Bell',
+    role: 'manager',
+    status: 'active',
+    phone: '+44 20 7946 0412',
+    createdAt: '2024-04-22T08:00:00.000Z',
+    lastSeenAt: '2026-08-20T15:11:00.000Z',
+    orderCount: 0,
+    marketingOptIn: false,
+  },
+  {
+    id: 'usr-3001',
+    email: 'sofia.duarte@lumenstore.example',
+    firstName: 'Sofia',
+    lastName: 'Duarte',
+    role: 'admin',
+    status: 'active',
+    phone: '+44 20 7946 0155',
+    createdAt: '2023-11-02T08:00:00.000Z',
+    lastSeenAt: '2026-08-21T07:52:00.000Z',
+    orderCount: 0,
+    marketingOptIn: false,
+  },
+];

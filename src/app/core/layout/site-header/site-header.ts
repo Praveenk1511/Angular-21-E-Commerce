@@ -1,12 +1,14 @@
-import { ChangeDetectionStrategy, Component, ElementRef, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { HEADER_ACTIONS, PRIMARY_NAVIGATION } from '@core/config/navigation.config';
+import { APP_URLS } from '@core/config/route-paths';
 import { createDisclosure } from '@core/layout/disclosure';
 import { MainNavigation } from '@core/layout/main-navigation/main-navigation';
 import { SiteLogo } from '@core/layout/site-logo/site-logo';
 import { SiteSearch } from '@core/layout/site-search/site-search';
 import { Icon } from '@shared/components/icon/icon';
+import { AuthStore } from '@state/auth.store';
 
 /**
  * Storefront masthead.
@@ -15,10 +17,9 @@ import { Icon } from '@shared/components/icon/icon';
  * only behaviour is the mobile disclosure menu; everything else is composition,
  * and every label and destination comes from navigation configuration.
  *
- * The menu follows the ARIA disclosure pattern: a button owning `aria-expanded`
- * and `aria-controls`, a panel that is genuinely removed from the accessibility
- * tree with `display: none` when collapsed, Escape to dismiss, and focus returned
- * to the button afterwards.
+ * The header account action reacts to auth state: signed-out users see "Sign in",
+ * signed-in users see their display name as a link to their profile, plus a logout
+ * action.
  */
 @Component({
   selector: 'app-site-header',
@@ -31,8 +32,15 @@ import { Icon } from '@shared/components/icon/icon';
   },
 })
 export class SiteHeader {
+  protected readonly auth = inject(AuthStore);
   protected readonly navigationItems = PRIMARY_NAVIGATION;
-  protected readonly actions = HEADER_ACTIONS;
+  protected readonly profileUrl = APP_URLS.profile;
+
+  /** Non-auth actions: wishlist and cart. The account action is handled separately. */
+  protected readonly utilityActions = HEADER_ACTIONS.filter((action) => action.id !== 'login');
+
+  /** Shown only when signed out. */
+  protected readonly loginAction = HEADER_ACTIONS.find((action) => action.id === 'login');
 
   private readonly menu = createDisclosure('site-header-menu');
   protected readonly menuId = this.menu.panelId;
@@ -50,7 +58,10 @@ export class SiteHeader {
     }
 
     this.menu.isOpen.set(false);
-    // Escape must not strand focus inside a panel that no longer exists.
     this.menuToggle()?.nativeElement.focus();
+  }
+
+  protected logout(): void {
+    this.auth.logout();
   }
 }

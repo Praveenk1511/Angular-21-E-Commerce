@@ -1,10 +1,17 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
+
+import { authTokenInterceptor } from '@core/interceptors/auth-token.interceptor';
+import { errorNormalisationInterceptor } from '@core/interceptors/error-normalisation.interceptor';
+import { loadingInterceptor } from '@core/interceptors/loading.interceptor';
+import { retryInterceptor } from '@core/interceptors/retry.interceptor';
+import { unauthorisedInterceptor } from '@core/interceptors/unauthorised.interceptor';
+import { mockApiInterceptor } from '@mock-api/mock-api.interceptor';
 
 import { routes } from './app.routes';
 
@@ -40,8 +47,61 @@ export const appConfig: ApplicationConfig = {
      */
     provideZonelessChangeDetection(),
 
-    /** `withFetch` uses the Fetch API, which is also the SSR-friendly choice. */
-    provideHttpClient(withFetch()),
+    /**
+     * HTTP stack with a layered interceptor chain.
+     *
+     * ┌─────────────────────────────────────────────────────────────────┐
+     * │  OUTGOING (request flows top → bottom)                          │
+     * │                                                                 │
+     * │  1. errorNormalisationInterceptor  — catches errors on the way  │
+     * │     back up; outermost so it sees everything                     │
+     * │  2. unauthorisedInterceptor — 401 triggers auto-logout          │
+     * │  3. loadingInterceptor — increments the global in-flight count  │
+     * │  4. authTokenInterceptor — attaches Bearer token                │
+     * │  5. retryInterceptor — retries transient GET failures           │
+     * │  6. mockApiInterceptor — answers requests from seed data        │
+     * │     (only when ngUseMockApi is true; eliminated otherwise)      │
+     * │                                                                 │
+     * │  INCOMING (response flows bottom → top)                         │
+     * └─────────────────────────────────────────────────────────────────┘
+     *
+     * Design rationale for the order:
+     *
+     * • Error normalisation is outermost so *every* error — including ones from
+     *   the auth or retry interceptors — is translated into ApiRequestError
+     *   before it reaches a store or component.
+     *
+     * • Unauthorised sits above loading so that a 401 clears the session before
+     *   the loading counter decrements (the redirect happens synchronously, and a
+     *   brief flash of "still loading" on the login page looks wrong).
+     *
+     * • Loading sits above auth-token so that re-attaching a fresh token after a
+     *   silent refresh does not produce a second "request started" event.
+     *
+     * • Auth-token sits above retry so retried requests carry the *current* token
+     *   rather than the one that was attached before the first attempt failed.
+     *
+     * • Retry is innermost (before the mock) so each attempt counts as one
+     *   logical request to the loading indicator, not N.
+     *
+     * • Mock is the terminal handler: it never calls `next(request)`, so nothing
+     *   reaches the network while it is active.
+     *
+     * REPLACING THE MOCK BACKEND: set `ngUseMockApi` to `false` in production's
+     * `angular.json` define block. The mock interceptor, handlers and all seed
+     * data are eliminated from the build. No other file changes.
+     */
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([
+        errorNormalisationInterceptor,
+        unauthorisedInterceptor,
+        loadingInterceptor,
+        authTokenInterceptor,
+        retryInterceptor,
+        ...(ngUseMockApi ? [mockApiInterceptor] : []),
+      ]),
+    ),
 
     provideRouter(routes, ...APP_ROUTER_FEATURES),
   ],

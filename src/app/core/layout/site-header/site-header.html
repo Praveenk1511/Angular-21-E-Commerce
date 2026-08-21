@@ -17,7 +17,32 @@
     <app-site-search class="site-header__search" />
 
     <ul class="site-header__actions" role="list">
-      @for (action of actions; track action.id) {
+      <!-- Account action: reactive to auth state -->
+      <li>
+        @if (auth.isAuthenticated()) {
+          <a
+            class="site-header__action site-header__action--labelled"
+            [routerLink]="profileUrl"
+            routerLinkActive="site-header__action--active"
+            ariaCurrentWhenActive="page"
+          >
+            <app-icon name="user" [size]="21" />
+            <span class="site-header__action-label">{{ auth.displayName() }}</span>
+          </a>
+        } @else if (loginAction) {
+          <a
+            class="site-header__action site-header__action--labelled"
+            [routerLink]="loginAction.url"
+            routerLinkActive="site-header__action--active"
+            ariaCurrentWhenActive="page"
+          >
+            <app-icon [name]="loginAction.icon" [size]="21" />
+            <span class="site-header__action-label">{{ loginAction.label }}</span>
+          </a>
+        }
+      </li>
+
+      @for (action of utilityActions; track action.id) {
         <li>
           <a
             class="site-header__action"
@@ -29,6 +54,16 @@
             <app-icon [name]="action.icon" [size]="21" />
             <span class="site-header__action-label">{{ action.label }}</span>
           </a>
+        </li>
+      }
+
+      <!-- Logout: shown only when signed in -->
+      @if (auth.isAuthenticated()) {
+        <li>
+          <button class="site-header__action" type="button" (click)="logout()">
+            <app-icon name="close" [size]="18" />
+            <span class="site-header__action-label">Sign out</span>
+          </button>
         </li>
       }
     </ul>

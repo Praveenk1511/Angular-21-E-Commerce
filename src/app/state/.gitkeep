@@ -1,5 +1,0 @@
-# Signal-based stores. One store per domain area.
-#
-# A store is the only thing a component talks to for data: it exposes readonly
-# signals plus command methods, calls services for I/O, and holds no templates.
-# Flow: Component -> Store -> Service -> (Mock) API -> Data.

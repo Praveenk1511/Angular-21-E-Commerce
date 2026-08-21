@@ -10,3 +10,13 @@
 
 /** True for development builds, false for production. Gates the design system page. */
 declare const ngDevDesignSystem: boolean;
+
+/**
+ * Whether the in-memory mock backend is compiled in.
+ *
+ * Currently `true` for every configuration, because there is no real REST API to talk
+ * to yet. Set it to `false` in the production configuration of `angular.json` the moment
+ * one exists: the mock interceptor, every handler and the whole `mock-data` folder then
+ * disappear from the bundle rather than shipping as unreachable weight.
+ */
+declare const ngUseMockApi: boolean;

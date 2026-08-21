@@ -36,13 +36,15 @@
               "includePaths": ["src/styles"]
             },
             "define": {
-              "ngDevDesignSystem": "true"
+              "ngDevDesignSystem": "true",
+              "ngUseMockApi": "true"
             }
           },
           "configurations": {
             "production": {
               "define": {
-                "ngDevDesignSystem": "false"
+                "ngDevDesignSystem": "false",
+                "ngUseMockApi": "true"
               },
               "budgets": [
                 {

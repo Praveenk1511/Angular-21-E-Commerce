@@ -1,2 +1,0 @@
-# Functional HttpInterceptorFn implementations (base URL, error normalisation,
-# auth token, loading indicator). Registered in app.config.ts when introduced.

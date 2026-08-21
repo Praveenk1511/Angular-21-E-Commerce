@@ -1,5 +1,6 @@
 import type { Routes } from '@angular/router';
 
+import { authGuard } from '@core/guards/auth.guard';
 import type { AppRouteData } from '@core/models';
 
 /**
@@ -17,14 +18,14 @@ export const ORDERS_ROUTES: Routes = [
     path: '',
     pathMatch: 'full',
     title: 'Your orders',
-    // Future: canActivate: [authGuard]
+    canActivate: [authGuard],
     data: { ...PROTECTED, breadcrumb: 'Orders' } satisfies AppRouteData,
     loadComponent: () => import('./pages/order-list/order-list').then((m) => m.OrderList),
   },
   {
     path: ':id',
     title: 'Order details',
-    // Future: canActivate: [authGuard]
+    canActivate: [authGuard],
     data: { ...PROTECTED, breadcrumb: 'Order' } satisfies AppRouteData,
     loadComponent: () => import('./pages/order-detail/order-detail').then((m) => m.OrderDetail),
   },

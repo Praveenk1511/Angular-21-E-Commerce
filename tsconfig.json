@@ -32,6 +32,7 @@
       "@features/*": ["src/app/features/*"],
       "@state/*": ["src/app/state/*"],
       "@mock-data/*": ["src/app/mock-data/*"],
+      "@mock-api/*": ["src/app/mock-api/*"],
       "@env": ["src/environments/environment"],
       "@environments/*": ["src/environments/*"]
     }

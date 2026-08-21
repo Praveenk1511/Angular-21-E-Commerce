@@ -1,2 +1,0 @@
-# Injectable services that talk to the API. Services own HTTP communication and
-# data mapping; they never hold view state (that belongs in state/).

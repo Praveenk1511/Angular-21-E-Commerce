@@ -23,6 +23,7 @@ export const SEGMENTS = {
   login: 'login',
   register: 'register',
   forgotPassword: 'forgot-password',
+  resetPassword: 'reset-password',
 
   // Admin area
   admin: 'admin',
@@ -63,6 +64,7 @@ export const APP_URLS = {
     login: `/${SEGMENTS.auth}/${SEGMENTS.login}`,
     register: `/${SEGMENTS.auth}/${SEGMENTS.register}`,
     forgotPassword: `/${SEGMENTS.auth}/${SEGMENTS.forgotPassword}`,
+    resetPassword: `/${SEGMENTS.auth}/${SEGMENTS.resetPassword}`,
   },
 
   admin: {

@@ -44,6 +44,30 @@ module.exports = defineConfig([
     },
   },
   {
+    // Architectural boundary, enforced rather than documented.
+    //
+    // The mock backend exists so it can be deleted. That only holds while nothing above
+    // it reads the fixtures directly — one component importing a seed array turns
+    // "remove one interceptor" into a refactor. The mock API itself is exempt, since
+    // reading seed data is its entire job.
+    files: ['**/*.ts'],
+    ignores: ['src/app/mock-api/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@mock-data', '@mock-data/*', '**/mock-data', '**/mock-data/*'],
+              message:
+                'Only the mock API may import seed data. Use a service from @core/services so the mock backend can be replaced without touching this file.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},

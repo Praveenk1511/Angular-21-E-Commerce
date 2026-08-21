@@ -1,6 +1,7 @@
 import type { Routes } from '@angular/router';
 
 import { SEGMENTS } from '@core/config/route-paths';
+import { adminGuard, authGuard } from '@core/guards/auth.guard';
 import { MainLayout } from '@core/layout/main-layout/main-layout';
 import type { AppRouteData } from '@core/models';
 import { INFO_ROUTES } from '@features/info/info.routes';
@@ -22,9 +23,9 @@ import { INFO_ROUTES } from '@features/info/info.routes';
  * admin code. Storefront pages are lazy per feature, and the shell itself is eager
  * because it renders on every navigation.
  *
- * Guards are deliberately absent. Routes that need protection already declare it in
- * their metadata (see {@link AppRouteData}), so the authentication phase adds
- * `canActivate`/`canMatch` without reshaping anything.
+ * Guards protect routes that require authentication or elevated privilege.
+ * See the Phase 03 comment on each route's `data` for which routes carry
+ * `requiresAuth` and `requiresAdmin`.
  */
 export const routes: Routes = [
   {
@@ -33,6 +34,7 @@ export const routes: Routes = [
   },
   {
     path: SEGMENTS.admin,
+    canMatch: [authGuard, adminGuard],
     loadChildren: () => import('@features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
 
@@ -79,7 +81,7 @@ export const routes: Routes = [
       {
         path: SEGMENTS.checkout,
         title: 'Checkout',
-        // Future: canActivate: [authGuard]
+        canActivate: [authGuard],
         data: { breadcrumb: 'Checkout', requiresAuth: true } satisfies AppRouteData,
         loadComponent: () =>
           import('@features/checkout/pages/checkout-page/checkout-page').then(
@@ -93,7 +95,7 @@ export const routes: Routes = [
       {
         path: SEGMENTS.profile,
         title: 'Your profile',
-        // Future: canActivate: [authGuard]
+        canActivate: [authGuard],
         data: { breadcrumb: 'Profile', requiresAuth: true } satisfies AppRouteData,
         loadComponent: () =>
           import('@features/profile/pages/profile-page/profile-page').then((m) => m.ProfilePage),

@@ -1,6 +1,7 @@
 import type { Routes } from '@angular/router';
 
 import { SEGMENTS } from '@core/config/route-paths';
+import { guestOnlyGuard } from '@core/guards/auth.guard';
 import { AuthLayout } from '@core/layout/auth-layout/auth-layout';
 import type { AppRouteData } from '@core/models';
 
@@ -11,15 +12,14 @@ import type { AppRouteData } from '@core/models';
  * the instant any auth route activates, and a second network round trip for the
  * shell would only delay the form.
  *
- * These routes will eventually want the inverse of an auth guard — a
- * "already signed in, go away" guard that redirects authenticated users to their
- * profile. That belongs to the authentication phase.
+ * The `guestOnlyGuard` redirects already-signed-in users to the home page. It sits
+ * on the layout route so every child inherits it without repeating the guard.
  */
 export const AUTH_ROUTES: Routes = [
   {
     path: '',
     component: AuthLayout,
-    // Future: canActivate: [guestOnlyGuard]
+    canActivate: [guestOnlyGuard],
     data: { breadcrumb: 'Account' } satisfies AppRouteData,
     children: [
       { path: '', pathMatch: 'full', redirectTo: SEGMENTS.login },
@@ -41,6 +41,13 @@ export const AUTH_ROUTES: Routes = [
         data: { breadcrumb: 'Forgot password' } satisfies AppRouteData,
         loadComponent: () =>
           import('./pages/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+      },
+      {
+        path: SEGMENTS.resetPassword,
+        title: 'Reset password',
+        data: { breadcrumb: 'Reset password' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./pages/reset-password/reset-password').then((m) => m.ResetPassword),
       },
       {
         path: '**',

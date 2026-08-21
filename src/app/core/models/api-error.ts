@@ -34,12 +34,33 @@ export class ApiRequestError extends Error implements ApiError {
     return this.status === 0;
   }
 
+  get isUnauthorised(): boolean {
+    return this.status === 401;
+  }
+
+  get isForbidden(): boolean {
+    return this.status === 403;
+  }
+
   get isNotFound(): boolean {
     return this.status === 404;
+  }
+
+  get isConflict(): boolean {
+    return this.status === 409;
   }
 
   /** True when the payload was rejected and {@link fieldErrors} may explain why. */
   get isValidationError(): boolean {
     return this.status === 422 || this.status === 400;
+  }
+
+  get isServerError(): boolean {
+    return this.status >= 500;
+  }
+
+  /** True for errors that are likely to resolve by trying again. */
+  get isTransient(): boolean {
+    return this.status === 0 || this.status === 429 || this.status === 503 || this.status === 504;
   }
 }

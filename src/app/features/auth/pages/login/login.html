@@ -1,0 +1,41 @@
+<div class="auth-form">
+  <h1 class="auth-form__title">Sign in</h1>
+  <p class="auth-form__subtitle">Enter your email and password to continue.</p>
+
+  @if (auth.authError(); as errorMessage) {
+    <div class="auth-form__alert" role="alert">{{ errorMessage }}</div>
+  }
+
+  <form class="auth-form__fields" [formGroup]="form" (ngSubmit)="submit()">
+    <app-input
+      formControlName="email"
+      [label]="'Email address'"
+      [type]="'email'"
+      [required]="true"
+      [autocomplete]="'email'"
+      [error]="emailError()"
+    />
+
+    <app-input
+      formControlName="password"
+      [label]="'Password'"
+      [type]="'password'"
+      [required]="true"
+      [autocomplete]="'current-password'"
+      [error]="passwordError()"
+    />
+
+    <div class="auth-form__actions">
+      <button appButton [fullWidth]="true" [loading]="auth.isLoading()" type="submit">
+        Sign in
+      </button>
+    </div>
+  </form>
+
+  <p class="auth-form__footer-link">
+    <a [routerLink]="forgotUrl">Forgot your password?</a>
+  </p>
+  <p class="auth-form__footer-link">
+    Don't have an account? <a [routerLink]="registerUrl">Create one</a>
+  </p>
+</div>

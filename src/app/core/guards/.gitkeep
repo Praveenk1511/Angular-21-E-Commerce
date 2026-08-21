@@ -1,3 +1,0 @@
-# Functional route guards (CanActivateFn / CanMatchFn).
-# Kept empty on purpose: guards are added by the phase that introduces the
-# protected route. Git does not track empty directories, hence this file.
