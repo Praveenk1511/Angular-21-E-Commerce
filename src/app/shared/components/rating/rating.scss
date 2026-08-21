@@ -1,0 +1,104 @@
+:host {
+  display: inline-block;
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- Read-only display ---------- */
+
+.rating__stars {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.rating__layer {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.rating__layer--empty {
+  color: var(--color-border-strong);
+}
+
+/*
+ * A single overlay clipped to a percentage, rather than per-star fractions. That is
+ * what lets a value like 3.6 render truthfully instead of being rounded to a whole
+ * star before it reaches the screen.
+ */
+.rating__layer--filled {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  overflow: hidden;
+  color: var(--color-warning-500);
+}
+
+.rating__layer--filled app-icon {
+  fill: currentcolor;
+}
+
+.rating__value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Interactive ---------- */
+
+.rating--interactive {
+  gap: var(--space-1);
+}
+
+.rating__option {
+  position: relative;
+  display: inline-flex;
+}
+
+.rating__native {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.rating__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--target-min-size);
+  block-size: var(--target-min-size);
+  color: var(--color-border-strong);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.rating__native:focus-visible + .rating__star {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: -4px;
+  border-radius: var(--radius-sm);
+}
+
+/*
+ * Fill every star up to the checked one. `:has` lets a later sibling's state style
+ * earlier ones, which is exactly the "stars up to N" pattern.
+ */
+.rating__option:hover .rating__star,
+.rating__option:has(~ .rating__option:hover) .rating__star,
+.rating__option:has(.rating__native:checked) .rating__star,
+.rating__option:has(~ .rating__option .rating__native:checked) .rating__star {
+  color: var(--color-warning-500);
+  fill: currentcolor;
+}
+
+.rating--interactive:disabled .rating__star {
+  color: var(--color-border);
+  cursor: not-allowed;
+}

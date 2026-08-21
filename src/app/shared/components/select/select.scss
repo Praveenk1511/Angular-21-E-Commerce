@@ -1,0 +1,37 @@
+@use 'mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.select__shell {
+  position: relative;
+  display: block;
+}
+
+.select__control {
+  @include mx.field-surface;
+
+  /* Room for the chevron, which is decorative and must not overlap long labels. */
+  padding-inline-end: var(--space-7);
+  appearance: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    border-color: var(--color-accent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.select__chevron {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--space-3);
+  translate: 0 -50%;
+  color: var(--color-text-muted);
+  /* Clicks belong to the select underneath. */
+  pointer-events: none;
+}

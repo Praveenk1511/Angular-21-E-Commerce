@@ -1,0 +1,23 @@
+<form class="site-search" role="search" (submit)="onSubmit($event)">
+  <label class="visually-hidden" [attr.for]="inputId">{{ label() }}</label>
+
+  <input
+    class="site-search__input"
+    [id]="inputId"
+    type="search"
+    name="q"
+    autocomplete="off"
+    [placeholder]="label()"
+    [disabled]="!enabled()"
+    [attr.aria-describedby]="enabled() ? null : hintId"
+  />
+
+  <button class="site-search__submit" type="submit" [disabled]="!enabled()">
+    <app-icon name="search" [size]="18" />
+    <span class="visually-hidden">Search</span>
+  </button>
+
+  @if (!enabled()) {
+    <p class="visually-hidden" [id]="hintId">Product search is not available yet.</p>
+  }
+</form>

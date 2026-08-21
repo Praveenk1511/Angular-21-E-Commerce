@@ -1,0 +1,11 @@
+:host {
+  display: inline-flex;
+  flex: none;
+  line-height: 0;
+}
+
+.icon {
+  display: block;
+  /* Inherits the parent's text colour so icons never need their own palette. */
+  color: inherit;
+}

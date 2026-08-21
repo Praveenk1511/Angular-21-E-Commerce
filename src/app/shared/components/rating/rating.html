@@ -1,0 +1,47 @@
+@if (readonly()) {
+  <!-- Static display. The stars are decorative; the value is real text. -->
+  <div class="rating">
+    <span class="rating__stars" aria-hidden="true">
+      <span class="rating__layer rating__layer--empty">
+        @for (star of stars(); track star) {
+          <app-icon name="star" [size]="18" />
+        }
+      </span>
+
+      <span class="rating__layer rating__layer--filled" [style.inline-size.%]="fillPercent()">
+        @for (star of stars(); track star) {
+          <app-icon name="star" [size]="18" />
+        }
+      </span>
+    </span>
+
+    @if (showValue()) {
+      <span class="rating__value">{{ spokenValue() }}</span>
+    } @else {
+      <span class="visually-hidden">{{ label() }}: {{ spokenValue() }}</span>
+    }
+  </div>
+} @else {
+  <fieldset class="rating rating--interactive" [disabled]="isDisabled()">
+    <legend class="visually-hidden">{{ label() }}</legend>
+
+    @for (star of stars(); track star) {
+      <span class="rating__option">
+        <input
+          class="rating__native"
+          type="radio"
+          [id]="optionId(star)"
+          [name]="groupName"
+          [value]="star"
+          [checked]="selected() === star"
+          (change)="onSelect(star)"
+          (blur)="markTouched()"
+        />
+        <label class="rating__star" [attr.for]="optionId(star)">
+          <app-icon name="star" [size]="24" />
+          <span class="visually-hidden">{{ starLabel(star) }}</span>
+        </label>
+      </span>
+    }
+  </fieldset>
+}

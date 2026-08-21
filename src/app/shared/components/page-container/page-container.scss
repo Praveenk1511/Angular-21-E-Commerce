@@ -1,0 +1,23 @@
+@use 'breakpoints' as bp;
+@use 'mixins' as mx;
+
+:host {
+  display: block;
+  padding-block: var(--space-5);
+
+  @include mx.container;
+
+  @include bp.respond-to('md') {
+    padding-block: var(--space-6);
+  }
+}
+
+/* Variants re-point the shared custom property, so the gutter logic stays in one
+   place and only the ceiling changes. Widths come from the container tokens. */
+:host(.page-container--narrow) {
+  --layout-max-width: var(--container-narrow);
+}
+
+:host(.page-container--wide) {
+  --layout-max-width: var(--container-wide);
+}

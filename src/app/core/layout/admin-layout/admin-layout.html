@@ -1,0 +1,40 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="admin-layout">
+  <header class="admin-layout__header">
+    <button
+      #sidebarToggle
+      class="admin-layout__sidebar-toggle"
+      type="button"
+      [attr.aria-expanded]="sidebarOpen()"
+      [attr.aria-controls]="sidebarId"
+      (click)="toggleSidebar()"
+    >
+      <app-icon [name]="sidebarOpen() ? 'close' : 'menu'" [size]="22" />
+      <span class="visually-hidden">
+        {{ sidebarOpen() ? 'Close admin menu' : 'Open admin menu' }}
+      </span>
+    </button>
+
+    <p class="admin-layout__title">
+      Admin
+      <span class="visually-hidden">console</span>
+    </p>
+
+    <a class="admin-layout__exit" [routerLink]="storefrontUrl">View storefront</a>
+  </header>
+
+  <div class="admin-layout__body">
+    <aside
+      class="admin-layout__sidebar"
+      [class.admin-layout__sidebar--open]="sidebarOpen()"
+      [id]="sidebarId"
+    >
+      <app-main-navigation [items]="navigationItems" [label]="'Admin'" [orientation]="'stacked'" />
+    </aside>
+
+    <main id="main-content" class="admin-layout__main" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>

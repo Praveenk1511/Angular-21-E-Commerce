@@ -1,0 +1,291 @@
+<app-page-container>
+  <div class="ds">
+    <header class="ds__intro">
+      <h1>Design system</h1>
+      <p class="ds__lead">
+        Every component below is standalone, keyboard operable and driven entirely by design tokens.
+        This page exists for review and is not part of the storefront.
+      </p>
+    </header>
+
+    <!-- ---------- Buttons ---------- -->
+    <section class="ds__section" aria-labelledby="ds-buttons">
+      <h2 id="ds-buttons" class="ds__heading">Button</h2>
+
+      <div class="ds__row">
+        <button appButton type="button">Primary</button>
+        <button appButton [variant]="'secondary'" type="button">Secondary</button>
+        <button appButton [variant]="'ghost'" type="button">Ghost</button>
+        <button appButton [variant]="'danger'" type="button">Danger</button>
+        <button appButton type="button" [disabled]="true">Disabled</button>
+        <a appButton [variant]="'secondary'" href="#ds-buttons">Anchor</a>
+      </div>
+
+      <div class="ds__row">
+        <button appButton [size]="'sm'" type="button">Small</button>
+        <button appButton [size]="'md'" type="button">Medium</button>
+        <button appButton [size]="'lg'" type="button">Large</button>
+        <button appButton type="button" [loading]="loadingButton()" (click)="toggleLoading()">
+          Toggle loading
+        </button>
+      </div>
+    </section>
+
+    <!-- ---------- Icon button and icons ---------- -->
+    <section class="ds__section" aria-labelledby="ds-icons">
+      <h2 id="ds-icons" class="ds__heading">Icon button &amp; icon set</h2>
+
+      <div class="ds__row">
+        <button appIconButton [label]="'Search'" type="button">
+          <app-icon name="search" />
+        </button>
+        <button appIconButton [label]="'Save to wishlist'" [variant]="'subtle'" type="button">
+          <app-icon name="heart" />
+        </button>
+        <button appIconButton [label]="'Remove item'" [variant]="'danger'" type="button">
+          <app-icon name="close" />
+        </button>
+        <button appIconButton [label]="'Unavailable'" type="button" [disabled]="true">
+          <app-icon name="plus" />
+        </button>
+      </div>
+
+      <ul class="ds__icon-grid" role="list">
+        @for (name of iconNames; track name) {
+          <li class="ds__icon-cell">
+            <app-icon [name]="name" [size]="22" />
+            <span class="ds__icon-name">{{ name }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <!-- ---------- Form controls ---------- -->
+    <section class="ds__section" aria-labelledby="ds-forms">
+      <h2 id="ds-forms" class="ds__heading">Form controls</h2>
+      <p class="ds__note">
+        All bound with <code>formControlName</code>. The last field is disabled by the form itself
+        rather than by an input.
+      </p>
+
+      <form class="ds__form" [formGroup]="form">
+        <app-input formControlName="fullName" [label]="'Full name'" [required]="true" />
+
+        <app-input
+          formControlName="email"
+          [label]="'Email address'"
+          [type]="'email'"
+          [hint]="'We only use this for order updates.'"
+          [autocomplete]="'email'"
+        />
+
+        <app-input
+          [label]="'Field with an error'"
+          [error]="'Enter a valid postcode.'"
+          [placeholder]="'SW1A 1AA'"
+        />
+
+        <app-input formControlName="locked" [label]="'Disabled by the form'" />
+
+        <app-select
+          formControlName="size"
+          [label]="'Size'"
+          [options]="sizeOptions"
+          [placeholder]="'Choose a size'"
+        />
+
+        <app-radio-group
+          formControlName="delivery"
+          [label]="'Delivery method'"
+          [options]="deliveryOptions"
+        />
+
+        <app-checkbox
+          formControlName="newsletter"
+          [label]="'Email me about new arrivals'"
+          [hint]="'You can unsubscribe at any time.'"
+        />
+
+        <app-checkbox [label]="'Partially selected group'" [indeterminate]="true" />
+
+        <app-quantity-selector formControlName="quantity" [labelHidden]="false" [max]="10" />
+
+        <div class="ds__field">
+          <p class="ds__field-label">Interactive rating</p>
+          <app-rating formControlName="score" [readonly]="false" [label]="'Your rating'" />
+        </div>
+
+        <output class="ds__output">{{ form.value | json }}</output>
+      </form>
+    </section>
+
+    <!-- ---------- Surfaces ---------- -->
+    <section class="ds__section" aria-labelledby="ds-surfaces">
+      <h2 id="ds-surfaces" class="ds__heading">Card &amp; badge</h2>
+
+      <div class="ds__grid">
+        <app-card>
+          <div cardHeader class="ds__card-header">
+            <span>Order 10482</span>
+            <app-badge [variant]="'success'">Delivered</app-badge>
+          </div>
+          <p class="ds__card-text">
+            Cards project header, body and footer slots. Empty slots collapse rather than leaving
+            padded gaps.
+          </p>
+          <div cardFooter>
+            <button appButton [variant]="'secondary'" [size]="'sm'" type="button">
+              View details
+            </button>
+          </div>
+        </app-card>
+
+        <app-card [interactive]="true">
+          <p class="ds__card-text">An interactive card gains hover elevation.</p>
+        </app-card>
+
+        <app-card [padding]="'sm'">
+          <div class="ds__row">
+            <app-badge [variant]="'neutral'">Neutral</app-badge>
+            <app-badge [variant]="'brand'">Brand</app-badge>
+            <app-badge [variant]="'success'">Success</app-badge>
+            <app-badge [variant]="'warning'">Warning</app-badge>
+            <app-badge [variant]="'danger'">Danger</app-badge>
+            <app-badge [variant]="'info'">Info</app-badge>
+          </div>
+        </app-card>
+      </div>
+    </section>
+
+    <!-- ---------- Feedback ---------- -->
+    <section class="ds__section" aria-labelledby="ds-feedback">
+      <h2 id="ds-feedback" class="ds__heading">Loading, empty &amp; error states</h2>
+
+      <div class="ds__row">
+        <app-spinner [size]="18" />
+        <app-spinner [size]="28" />
+        <app-spinner [size]="40" [announce]="false" />
+      </div>
+
+      <div class="ds__grid">
+        <app-card [padding]="'md'">
+          <app-skeleton [lines]="3" />
+          <app-skeleton [variant]="'rect'" [height]="'6rem'" />
+          <app-skeleton [variant]="'circle'" [width]="'3rem'" />
+        </app-card>
+
+        <app-card [padding]="'none'">
+          <app-empty-state
+            [heading]="'No saved items yet'"
+            [description]="'Products you save will show up here.'"
+          >
+            <button appButton [variant]="'primary'" [size]="'sm'" type="button">
+              Start shopping
+            </button>
+          </app-empty-state>
+        </app-card>
+
+        <app-error-state (retry)="notify('info')" />
+      </div>
+    </section>
+
+    <!-- ---------- Navigation ---------- -->
+    <section class="ds__section" aria-labelledby="ds-navigation">
+      <h2 id="ds-navigation" class="ds__heading">Breadcrumb &amp; pagination</h2>
+
+      <app-breadcrumb [items]="breadcrumbTrail" />
+
+      <app-pagination
+        [page]="currentPage()"
+        [totalPages]="12"
+        (pageChange)="onPageChange($event)"
+      />
+      <p class="ds__note">Current page: {{ currentPage() }}</p>
+    </section>
+
+    <!-- ---------- Rating display ---------- -->
+    <section class="ds__section" aria-labelledby="ds-rating">
+      <h2 id="ds-rating" class="ds__heading">Rating (read-only)</h2>
+
+      <div class="ds__row">
+        <app-rating [rating]="4.6" [showValue]="true" />
+        <app-rating [rating]="3" [showValue]="true" />
+        <app-rating [rating]="0" [showValue]="true" />
+      </div>
+    </section>
+
+    <!-- ---------- Overlays ---------- -->
+    <section class="ds__section" aria-labelledby="ds-overlays">
+      <h2 id="ds-overlays" class="ds__heading">Overlays</h2>
+      <p class="ds__note">
+        All three use the native <code>&lt;dialog&gt;</code> element, so focus is trapped, Escape
+        closes, and focus returns to the trigger.
+      </p>
+
+      <div class="ds__row">
+        <button appButton type="button" (click)="modalOpen.set(true)">Open modal</button>
+        <button appButton [variant]="'secondary'" type="button" (click)="drawerOpen.set(true)">
+          Open drawer
+        </button>
+        <button appButton [variant]="'danger'" type="button" (click)="confirmOpen.set(true)">
+          Delete something
+        </button>
+      </div>
+
+      @if (lastConfirmResult()) {
+        <p class="ds__note">Last confirmation: {{ lastConfirmResult() }}</p>
+      }
+
+      <app-modal [(open)]="modalOpen" [heading]="'Modal title'">
+        <p>
+          Long content scrolls inside the panel. Tabbing cycles within the dialog and background
+          content is inert.
+        </p>
+        <div modalFooter>
+          <button appButton [variant]="'secondary'" type="button" (click)="modalOpen.set(false)">
+            Close
+          </button>
+          <button appButton type="button" (click)="modalOpen.set(false)">Save</button>
+        </div>
+      </app-modal>
+
+      <app-drawer [(open)]="drawerOpen" [heading]="'Filters'">
+        <p>Edge-anchored panel sharing the modal's focus behaviour.</p>
+      </app-drawer>
+
+      <app-confirm-dialog
+        [(open)]="confirmOpen"
+        [heading]="'Delete this item?'"
+        [message]="'This cannot be undone.'"
+        [confirmLabel]="'Delete'"
+        [tone]="'danger'"
+        [busy]="confirmBusy()"
+        (confirmed)="onConfirmed()"
+        (cancelled)="onCancelled()"
+      />
+    </section>
+
+    <!-- ---------- Toasts ---------- -->
+    <section class="ds__section" aria-labelledby="ds-toasts">
+      <h2 id="ds-toasts" class="ds__heading">Toast</h2>
+      <p class="ds__note">
+        Errors stay until dismissed; the rest retire on a timer. Every toast keeps a close button.
+      </p>
+
+      <div class="ds__row">
+        <button appButton [variant]="'secondary'" type="button" (click)="notify('success')">
+          Success
+        </button>
+        <button appButton [variant]="'secondary'" type="button" (click)="notify('info')">
+          Info
+        </button>
+        <button appButton [variant]="'secondary'" type="button" (click)="notify('warning')">
+          Warning
+        </button>
+        <button appButton [variant]="'secondary'" type="button" (click)="notify('error')">
+          Error (sticky)
+        </button>
+      </div>
+    </section>
+  </div>
+</app-page-container>

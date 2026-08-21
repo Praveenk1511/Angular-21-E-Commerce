@@ -1,0 +1,83 @@
+@use 'mixins' as mx;
+
+:host {
+  @include mx.control-base;
+
+  cursor: pointer;
+  /* Never let a button shrink below the accessible tap target. */
+  min-inline-size: var(--target-min-size);
+}
+
+:host(.button--full) {
+  display: flex;
+  inline-size: 100%;
+}
+
+/* `--inert` covers both the disabled input and the loading state. The native
+   `:disabled` selector cannot reach an anchor, so the class carries the styling. */
+:host(.button--inert) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ---------- Sizes ---------- */
+
+:host(.button--sm) {
+  min-block-size: var(--control-height-sm);
+  padding-inline: var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+:host(.button--lg) {
+  min-block-size: var(--control-height-lg);
+  padding-inline: var(--space-5);
+  font-size: var(--font-size-base);
+}
+
+/* ---------- Variants ---------- */
+
+:host(.button--primary) {
+  background-color: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+:host(.button--primary:hover:not(.button--inert)) {
+  background-color: var(--color-accent-hover);
+  color: var(--color-text-inverse);
+}
+
+:host(.button--secondary) {
+  background-color: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+:host(.button--secondary:hover:not(.button--inert)) {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+:host(.button--ghost) {
+  background-color: transparent;
+  color: var(--color-text-muted);
+}
+
+:host(.button--ghost:hover:not(.button--inert)) {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+:host(.button--danger) {
+  background-color: var(--color-danger-500);
+  color: var(--color-text-inverse);
+}
+
+:host(.button--danger:hover:not(.button--inert)) {
+  background-color: var(--color-danger-700);
+  color: var(--color-text-inverse);
+}
+
+.button__spinner {
+  /* The label stays visible beside the spinner so the name never disappears. */
+  margin-inline-end: var(--space-1);
+}

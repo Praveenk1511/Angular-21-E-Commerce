@@ -1,0 +1,161 @@
+/// Design tokens.
+///
+/// Emitted as CSS custom properties so components consume them at runtime and
+/// never hard-code a colour, spacing step or radius. This file is the single
+/// place a visual decision is made; component stylesheets reference tokens only.
+///
+/// Only `styles.scss` should load this partial — it emits CSS, so pulling it
+/// into a component stylesheet would duplicate the `:root` block per component.
+
+:root {
+  /* ---------- Colour: brand ---------- */
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #d9e4ff;
+  --color-brand-200: #bccffe;
+  --color-brand-300: #8eaefc;
+  --color-brand-400: #5983f8;
+  --color-brand-500: #345ef0;
+  --color-brand-600: #1f3fdd;
+  --color-brand-700: #1c31b3;
+  --color-brand-800: #1c2c8e;
+  --color-brand-900: #1c2b70;
+
+  /* ---------- Colour: neutral ---------- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f8f9fb;
+  --color-neutral-100: #f1f3f7;
+  --color-neutral-200: #e4e7ee;
+  --color-neutral-300: #cbd1dd;
+  --color-neutral-400: #9aa3b5;
+  --color-neutral-500: #6f7889;
+  --color-neutral-600: #525a69;
+  --color-neutral-700: #3d4452;
+  --color-neutral-800: #262b36;
+  --color-neutral-900: #14171e;
+
+  /* ---------- Colour: status ----------
+   * Each status carries a subtle surface, a border and a text-safe shade so
+   * badges, toasts and inline validation never invent their own colours.
+   * Status is always paired with text or an icon — colour alone must not be the
+   * only signal (WCAG 1.4.1). */
+  --color-success-50: #e8f6ee;
+  --color-success-200: #a9dcc0;
+  --color-success-500: #1f9254;
+  --color-success-700: #16693c;
+
+  --color-warning-50: #fdf4e3;
+  --color-warning-200: #f0d9a5;
+  --color-warning-500: #b7791f;
+  --color-warning-700: #8a5b14;
+
+  --color-danger-50: #fdecec;
+  --color-danger-200: #f3b9b9;
+  --color-danger-500: #d23f3f;
+  --color-danger-700: #a52c2c;
+
+  --color-info-50: #e9f1fa;
+  --color-info-200: #b3cee9;
+  --color-info-500: #2b6cb0;
+  --color-info-700: #1f5185;
+
+  /* ---------- Semantic aliases ---------- */
+  --color-surface: var(--color-neutral-0);
+  --color-surface-muted: var(--color-neutral-50);
+  --color-surface-raised: var(--color-neutral-0);
+  --color-border: var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-300);
+  --color-text: var(--color-neutral-800);
+  --color-text-muted: var(--color-neutral-500);
+  --color-text-inverse: var(--color-neutral-0);
+  --color-accent: var(--color-brand-600);
+  --color-accent-hover: var(--color-brand-700);
+  --color-focus: var(--color-brand-600);
+
+  /* ---------- Typography ---------- */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
+  --font-mono: ui-monospace, sfmono-regular, 'SF Mono', consolas, monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-3xl: 2.25rem;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-none: 1;
+  --line-height-tight: 1.2;
+  --line-height-base: 1.6;
+
+  --letter-spacing-tight: -0.015em;
+  --letter-spacing-wide: 0.06em;
+
+  /* ---------- Spacing (4px scale) ---------- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* ---------- Radii ---------- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* ---------- Elevation ---------- */
+  --shadow-sm: 0 1px 2px rgb(20 23 30 / 8%);
+  --shadow-md: 0 4px 12px rgb(20 23 30 / 10%);
+  --shadow-lg: 0 12px 32px rgb(20 23 30 / 14%);
+
+  /* ---------- Motion ---------- */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+
+  /* ---------- Layout: container widths ---------- */
+  --container-narrow: 720px;
+  --container-default: 1280px;
+  --container-wide: 1600px;
+
+  /* The width the shared gutter honours. Components override it to switch preset. */
+  --layout-max-width: var(--container-default);
+  --layout-header-height: 4rem;
+
+  /* ---------- Borders ---------- */
+  --border-width: 1px;
+  --border-width-thick: 2px;
+
+  /* ---------- Form controls ----------
+   * Shared heights keep inputs, selects and buttons aligned when they sit on the
+   * same row. All are >= 44px at `md` and above to stay comfortably tappable. */
+  --control-height-sm: 2rem;
+  --control-height-md: 2.75rem;
+  --control-height-lg: 3.25rem;
+  --control-padding-inline: var(--space-3);
+
+  /* ---------- Overlays ---------- */
+  --overlay-backdrop: rgb(20 23 30 / 55%);
+  --overlay-max-width: 32rem;
+  --drawer-width: 22rem;
+
+  /* ---------- Accessibility ---------- */
+  --focus-ring-width: 3px;
+  /* Minimum interactive target, per WCAG 2.5.8. */
+  --target-min-size: 44px;
+
+  /* ---------- Stacking order ---------- */
+  --z-header: 100;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+}

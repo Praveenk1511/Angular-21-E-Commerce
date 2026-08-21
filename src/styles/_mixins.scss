@@ -1,0 +1,133 @@
+/// Hide an element visually while keeping it available to screen readers.
+///
+/// Use this instead of `display: none` for labels and live-region text that
+/// assistive technology still needs to announce.
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/// Undo `visually-hidden`, for text that is hidden on small screens and revealed
+/// on larger ones. Every property the hiding mixin sets is restored here.
+@mixin visually-hidden-reset {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip-path: none;
+  white-space: nowrap;
+}
+
+/// Consistent, high-contrast keyboard focus indicator.
+///
+/// Applied via `:focus-visible` so pointer users do not see it, but keyboard and
+/// switch-device users always do.
+@mixin focus-ring($offset: 2px) {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: $offset;
+}
+
+/// Horizontally centred page gutter.
+@mixin container {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+/// Respect the user's reduced-motion preference for a block of transitions.
+@mixin motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    @content;
+  }
+}
+
+/// Raised panel surface shared by cards, popovers and dialogs.
+@mixin surface($radius: var(--radius-lg)) {
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: $radius;
+}
+
+/// Baseline for any interactive control: consistent box, no double focus rings,
+/// and a target that never falls below the accessible minimum.
+@mixin control-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-block-size: var(--control-height-md);
+  padding-inline: var(--control-padding-inline);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-none);
+  text-decoration: none;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+/// Square control sized to the accessible minimum, for icon-only affordances.
+@mixin icon-target($size: var(--target-min-size)) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: $size;
+  block-size: $size;
+  flex: none;
+}
+
+/// Text field / select box appearance.
+@mixin field-surface {
+  inline-size: 100%;
+  min-block-size: var(--control-height-md);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  &:disabled {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-danger-500);
+  }
+}
+
+/// Truncate a single line of text with an ellipsis.
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

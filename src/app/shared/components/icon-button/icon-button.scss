@@ -1,0 +1,55 @@
+@use 'mixins' as mx;
+
+:host {
+  @include mx.icon-target;
+
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+/* The small size shrinks the visual box but keeps the hit area at the accessible
+   minimum via a transparent outset, so dense toolbars stay tappable. */
+:host(.icon-button--sm) {
+  inline-size: 2rem;
+  block-size: 2rem;
+  outline-offset: 0;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 50%;
+    inline-size: var(--target-min-size);
+    block-size: var(--target-min-size);
+    translate: -50% -50%;
+  }
+}
+
+:host(.icon-button--plain:hover:not(:disabled)) {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+:host(.icon-button--subtle) {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+:host(.icon-button--subtle:hover:not(:disabled)) {
+  background-color: var(--color-border);
+}
+
+:host(.icon-button--danger:hover:not(:disabled)) {
+  background-color: var(--color-danger-50);
+  color: var(--color-danger-700);
+}

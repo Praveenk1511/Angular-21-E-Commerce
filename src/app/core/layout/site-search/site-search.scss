@@ -1,0 +1,55 @@
+.site-search {
+  display: flex;
+  align-items: stretch;
+  inline-size: 100%;
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+
+  /* One ring around the whole control reads better than two on the parts. */
+  &:focus-within {
+    border-color: var(--color-accent);
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 1px;
+  }
+}
+
+.site-search__input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  background: transparent;
+  font-size: var(--font-size-sm);
+
+  /* The wrapper already shows focus, so suppress the inner ring only here. */
+  &:focus-visible {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.site-search__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--space-4);
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+
+  &:hover:not(:disabled) {
+    color: var(--color-accent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}

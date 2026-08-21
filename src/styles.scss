@@ -1,0 +1,13 @@
+/// Global stylesheet.
+///
+/// Load order matters: tokens define the custom properties every later rule
+/// reads, the reset neutralises browser defaults, then base applies typography
+/// and app-wide utilities.
+///
+/// Component stylesheets must NOT load `tokens` or `reset` — they only `@use`
+/// the CSS-free partials (`breakpoints`, `mixins`), which are resolvable by name
+/// thanks to `stylePreprocessorOptions.includePaths` in `angular.json`.
+
+@use 'tokens';
+@use 'reset';
+@use 'base';

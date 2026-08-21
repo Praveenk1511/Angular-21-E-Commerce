@@ -1,0 +1,10 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+}
+
+/* Grows to fill the viewport so short pages still push the footer to the bottom. */
+.main-layout__content {
+  flex: 1 1 auto;
+}

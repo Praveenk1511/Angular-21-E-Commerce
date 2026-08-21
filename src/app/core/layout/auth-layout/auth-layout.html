@@ -1,0 +1,34 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<div class="auth-layout">
+  <header class="auth-layout__header">
+    <app-site-logo />
+  </header>
+
+  <main id="main-content" class="auth-layout__main" tabindex="-1">
+    <div class="auth-layout__card">
+      <router-outlet />
+    </div>
+
+    <nav class="auth-layout__links" aria-label="Account options">
+      <ul class="auth-layout__link-list" role="list">
+        @for (link of authLinks; track link.id) {
+          <li>
+            <a
+              class="auth-layout__link"
+              [routerLink]="link.url"
+              routerLinkActive="auth-layout__link--active"
+              ariaCurrentWhenActive="page"
+            >
+              {{ link.label }}
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </main>
+
+  <footer class="auth-layout__footer">
+    <p class="auth-layout__copyright">&copy; {{ currentYear }} {{ appName }}</p>
+  </footer>
+</div>

@@ -1,0 +1,31 @@
+<div class="quantity">
+  <label class="quantity__label" [class.visually-hidden]="labelHidden()" [attr.for]="controlId">
+    {{ label() }}
+  </label>
+
+  <div class="quantity__group">
+    <button class="quantity__step" type="button" [disabled]="!canDecrease()" (click)="decrease()">
+      <app-icon name="minus" [size]="16" />
+      <span class="visually-hidden">Decrease {{ label() }}</span>
+    </button>
+
+    <input
+      class="quantity__input"
+      type="number"
+      inputmode="numeric"
+      [id]="controlId"
+      [value]="current()"
+      [min]="min()"
+      [max]="max()"
+      [step]="step()"
+      [disabled]="isDisabled()"
+      (input)="onInput($event)"
+      (blur)="markTouched()"
+    />
+
+    <button class="quantity__step" type="button" [disabled]="!canIncrease()" (click)="increase()">
+      <app-icon name="plus" [size]="16" />
+      <span class="visually-hidden">Increase {{ label() }}</span>
+    </button>
+  </div>
+</div>

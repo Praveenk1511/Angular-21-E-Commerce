@@ -1,0 +1,34 @@
+<footer class="site-footer">
+  <div class="site-footer__top container">
+    <nav class="site-footer__nav" aria-label="Footer">
+      @for (group of linkGroups; track group.id) {
+        <div class="site-footer__group">
+          <h2 class="site-footer__heading">{{ group.heading }}</h2>
+          <ul class="site-footer__list" role="list">
+            @for (item of group.items; track item.id) {
+              <li>
+                <a
+                  class="site-footer__link"
+                  [routerLink]="item.url"
+                  routerLinkActive="site-footer__link--active"
+                  ariaCurrentWhenActive="page"
+                >
+                  {{ item.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </nav>
+  </div>
+
+  <div class="site-footer__bottom">
+    <div class="site-footer__bottom-inner container">
+      <app-site-logo />
+      <p class="site-footer__copyright">
+        &copy; {{ currentYear }} {{ appName }}. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>

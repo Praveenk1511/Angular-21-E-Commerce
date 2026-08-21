@@ -1,0 +1,26 @@
+<app-form-field
+  [label]="label()"
+  [controlId]="controlId"
+  [hint]="hint()"
+  [hintId]="hintId"
+  [error]="error()"
+  [errorId]="errorId"
+  [required]="required()"
+  [labelHidden]="labelHidden()"
+>
+  <input
+    class="input__control"
+    [id]="controlId"
+    [type]="type()"
+    [value]="value() ?? ''"
+    [placeholder]="placeholder()"
+    [disabled]="isDisabled()"
+    [readOnly]="readonly()"
+    [required]="required()"
+    [attr.autocomplete]="autocomplete()"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (input)="onInput($event)"
+    (blur)="markTouched()"
+  />
+</app-form-field>

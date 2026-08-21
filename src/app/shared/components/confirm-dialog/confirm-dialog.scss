@@ -1,0 +1,18 @@
+@use 'breakpoints' as bp;
+
+.confirm-dialog__message {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.confirm-dialog__actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-2);
+  inline-size: 100%;
+
+  @include bp.respond-to('sm') {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}

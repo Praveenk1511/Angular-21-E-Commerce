@@ -1,0 +1,25 @@
+@use 'breakpoints' as bp;
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-block: var(--space-6);
+  text-align: center;
+
+  @include bp.respond-to('md') {
+    padding-block: var(--space-7);
+  }
+}
+
+.home__title {
+  margin: 0;
+}
+
+.home__lead {
+  margin: 0;
+  margin-inline: auto;
+  max-inline-size: 46ch;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+}

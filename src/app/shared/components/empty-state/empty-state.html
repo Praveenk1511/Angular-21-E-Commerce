@@ -1,0 +1,15 @@
+<div class="empty-state">
+  <span class="empty-state__icon" aria-hidden="true">
+    <app-icon [name]="icon()" [size]="32" />
+  </span>
+
+  <p class="empty-state__heading">{{ heading() }}</p>
+
+  @if (description()) {
+    <p class="empty-state__description">{{ description() }}</p>
+  }
+
+  <div class="empty-state__actions">
+    <ng-content />
+  </div>
+</div>

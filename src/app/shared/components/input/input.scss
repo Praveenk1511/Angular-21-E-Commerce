@@ -1,0 +1,17 @@
+@use 'mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.input__control {
+  @include mx.field-surface;
+
+  &:focus-visible {
+    border-color: var(--color-accent);
+  }
+
+  &:read-only:not(:disabled) {
+    background-color: var(--color-surface-muted);
+  }
+}

@@ -1,0 +1,112 @@
+:host {
+  display: block;
+}
+
+.checkbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.checkbox__row {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.checkbox__control {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  /* Aligns the box with the first line of label text at any font size. */
+  margin-block-start: 0.15em;
+}
+
+/*
+ * The native input stays present and hit-testable, stretched over the visual box.
+ * `opacity: 0` rather than `display: none` so keyboard focus, activation and form
+ * semantics all continue to work.
+ */
+.checkbox__native {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.checkbox__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: var(--border-width-thick) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-inverse);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.checkbox__native:checked + .checkbox__box,
+.checkbox__native:indeterminate + .checkbox__box {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Focus lives on the hidden input, so the ring is drawn on its visible proxy. */
+.checkbox__native:focus-visible + .checkbox__box {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.checkbox__native[aria-invalid='true'] + .checkbox__box {
+  border-color: var(--color-danger-500);
+}
+
+.checkbox__native:disabled + .checkbox__box {
+  background-color: var(--color-surface-muted);
+  border-color: var(--color-border);
+  opacity: 0.7;
+}
+
+.checkbox__label {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.checkbox__native:disabled ~ .checkbox__label,
+.checkbox__row:has(.checkbox__native:disabled) .checkbox__label {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.checkbox__required {
+  color: var(--color-danger-500);
+}
+
+.checkbox__hint,
+.checkbox__error {
+  margin: 0;
+  padding-inline-start: calc(1.25rem + var(--space-3));
+  font-size: var(--font-size-xs);
+}
+
+.checkbox__hint {
+  color: var(--color-text-muted);
+}
+
+.checkbox__error {
+  color: var(--color-danger-700);
+  font-weight: var(--font-weight-medium);
+}

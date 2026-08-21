@@ -1,0 +1,33 @@
+<!-- Present even when empty, so assistive technology is already observing it. -->
+<div
+  class="toast-container"
+  role="region"
+  aria-label="Notifications"
+  aria-live="polite"
+  aria-relevant="additions"
+>
+  @for (toast of toasts(); track toast.id) {
+    <div class="toast" [class]="'toast--' + toast.variant" [attr.role]="roleFor(toast)">
+      <span class="toast__icon" aria-hidden="true">
+        <app-icon [name]="iconFor(toast)" [size]="20" />
+      </span>
+
+      <div class="toast__content">
+        <p class="toast__title">{{ toast.title }}</p>
+        @if (toast.message) {
+          <p class="toast__message">{{ toast.message }}</p>
+        }
+      </div>
+
+      <button
+        appIconButton
+        [label]="'Dismiss notification'"
+        [variant]="'plain'"
+        [size]="'sm'"
+        (click)="dismiss(toast.id)"
+      >
+        <app-icon name="close" [size]="16" />
+      </button>
+    </div>
+  }
+</div>

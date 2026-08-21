@@ -1,0 +1,48 @@
+@if (totalPages() > 1) {
+  <nav class="pagination" [attr.aria-label]="label()">
+    <ul class="pagination__list" role="list">
+      <li>
+        <button
+          class="pagination__step"
+          type="button"
+          [disabled]="!hasPrevious()"
+          (click)="goTo(page() - 1)"
+        >
+          <app-icon name="chevron-left" [size]="18" />
+          <span class="visually-hidden">Previous page</span>
+        </button>
+      </li>
+
+      @for (slot of slots(); track $index) {
+        <li>
+          @if (slot.kind === 'page') {
+            <button
+              class="pagination__page"
+              type="button"
+              [class.pagination__page--current]="isCurrent(slot.page)"
+              [attr.aria-current]="isCurrent(slot.page) ? 'page' : null"
+              (click)="goTo(slot.page)"
+            >
+              <span class="visually-hidden">Page</span>
+              {{ slot.page }}
+            </button>
+          } @else {
+            <span class="pagination__gap" aria-hidden="true">&hellip;</span>
+          }
+        </li>
+      }
+
+      <li>
+        <button
+          class="pagination__step"
+          type="button"
+          [disabled]="!hasNext()"
+          (click)="goTo(page() + 1)"
+        >
+          <app-icon name="chevron-right" [size]="18" />
+          <span class="visually-hidden">Next page</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+}

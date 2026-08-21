@@ -1,0 +1,123 @@
+:host {
+  display: block;
+}
+
+.radio-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.radio-group__legend {
+  padding: 0;
+  margin-block-end: var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.radio-group__required {
+  color: var(--color-danger-500);
+}
+
+.radio-group__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.radio-group__options--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.radio-group__option {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.radio-group__control {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  margin-block-start: 0.15em;
+}
+
+/* As with the checkbox: the native input stays, invisible but fully functional. */
+.radio-group__native {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.radio-group__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: var(--border-width-thick) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  transition: border-color var(--transition-fast);
+
+  &::after {
+    content: '';
+    inline-size: 0.6rem;
+    block-size: 0.6rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-accent);
+    scale: 0;
+    transition: scale var(--transition-fast);
+  }
+}
+
+.radio-group__native:checked + .radio-group__dot {
+  border-color: var(--color-accent);
+
+  &::after {
+    scale: 1;
+  }
+}
+
+.radio-group__native:focus-visible + .radio-group__dot {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.radio-group__native:disabled + .radio-group__dot {
+  background-color: var(--color-surface-muted);
+  border-color: var(--color-border);
+}
+
+.radio-group__label {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.radio-group__hint,
+.radio-group__error {
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-xs);
+}
+
+.radio-group__hint {
+  color: var(--color-text-muted);
+}
+
+.radio-group__error {
+  color: var(--color-danger-700);
+  font-weight: var(--font-weight-medium);
+}

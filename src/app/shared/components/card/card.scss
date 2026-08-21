@@ -1,0 +1,68 @@
+@use 'mixins' as mx;
+
+:host {
+  @include mx.surface;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+:host(.card--interactive) {
+  transition:
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
+}
+
+:host(.card--interactive:hover) {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+/* An empty projection slot must not leave a padded gap behind. */
+.card__header:empty,
+.card__footer:empty {
+  display: none;
+}
+
+.card__header {
+  border-block-end: var(--border-width) solid var(--color-border);
+}
+
+.card__footer {
+  margin-block-start: auto;
+  border-block-start: var(--border-width) solid var(--color-border);
+  background-color: var(--color-surface-muted);
+}
+
+:host(.card--pad-none) {
+  .card__header,
+  .card__body,
+  .card__footer {
+    padding: 0;
+  }
+}
+
+:host(.card--pad-sm) {
+  .card__header,
+  .card__body,
+  .card__footer {
+    padding: var(--space-3);
+  }
+}
+
+:host(.card--pad-md) {
+  .card__header,
+  .card__body,
+  .card__footer {
+    padding: var(--space-4);
+  }
+}
+
+:host(.card--pad-lg) {
+  .card__header,
+  .card__body,
+  .card__footer {
+    padding: var(--space-5);
+  }
+}

@@ -1,0 +1,18 @@
+# Normalise line endings so the repo stays identical across Windows/macOS/Linux
+# checkouts and Prettier does not fight the working copy.
+* text=auto eol=lf
+
+# Binary assets must never be normalised.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Keep generated lockfile diffs out of code review noise.
+package-lock.json -diff linguist-generated=true

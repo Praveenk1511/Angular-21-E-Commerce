@@ -1,0 +1,88 @@
+@use 'mixins' as mx;
+
+/// Global element styling and the small set of genuinely app-wide utilities.
+
+html {
+  block-size: 100%;
+}
+
+body {
+  min-block-size: 100%;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background-color: var(--color-surface-muted);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-semibold);
+}
+
+h1 {
+  font-size: var(--font-size-3xl);
+}
+
+h2 {
+  font-size: var(--font-size-2xl);
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* Never remove the focus indicator — only scope it to keyboard interaction. */
+:focus-visible {
+  @include mx.focus-ring;
+}
+
+/* ---------- Utilities ---------- */
+
+.visually-hidden {
+  @include mx.visually-hidden;
+}
+
+.container {
+  @include mx.container;
+}
+
+/// Keyboard shortcut that lets users jump past the header straight to content.
+/// Hidden until focused.
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Routed views should fill the available height so short pages still push the
+   footer to the bottom of the viewport. */
+main:focus {
+  outline: none;
+}

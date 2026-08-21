@@ -1,0 +1,42 @@
+<header class="site-header">
+  <div class="site-header__bar container">
+    <button
+      #menuToggle
+      class="site-header__menu-toggle"
+      type="button"
+      [attr.aria-expanded]="menuOpen()"
+      [attr.aria-controls]="menuId"
+      (click)="toggleMenu()"
+    >
+      <app-icon [name]="menuOpen() ? 'close' : 'menu'" [size]="22" />
+      <span class="visually-hidden">{{ menuOpen() ? 'Close main menu' : 'Open main menu' }}</span>
+    </button>
+
+    <app-site-logo class="site-header__logo" />
+
+    <app-site-search class="site-header__search" />
+
+    <ul class="site-header__actions" role="list">
+      @for (action of actions; track action.id) {
+        <li>
+          <a
+            class="site-header__action"
+            [class.site-header__action--labelled]="action.showLabelOnDesktop"
+            [routerLink]="action.url"
+            routerLinkActive="site-header__action--active"
+            ariaCurrentWhenActive="page"
+          >
+            <app-icon [name]="action.icon" [size]="21" />
+            <span class="site-header__action-label">{{ action.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <div class="site-header__menu" [class.site-header__menu--open]="menuOpen()" [id]="menuId">
+    <div class="site-header__menu-inner container">
+      <app-main-navigation [items]="navigationItems" />
+    </div>
+  </div>
+</header>

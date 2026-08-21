@@ -1,0 +1,42 @@
+<!--
+  `dismissible=false` removes the modal's close button. That is both better UX for a
+  question (Cancel already exists, so an X is redundant) and what makes Cancel the
+  first focusable element in the dialog — so the platform's own dialog focusing step
+  lands on the safe answer, with no `autofocus` attribute needed.
+-->
+<app-modal
+  [open]="open()"
+  (openChange)="onOpenChange($event)"
+  [heading]="heading()"
+  [size]="'sm'"
+  [dismissible]="false"
+  [closeOnBackdrop]="!isDanger()"
+>
+  @if (message()) {
+    <p class="confirm-dialog__message">{{ message() }}</p>
+  }
+
+  <div modalFooter class="confirm-dialog__actions">
+    <!-- Cancel is first in DOM order, so it receives initial focus. Visual order is
+         reversed by CSS, keeping Confirm on the right where it is expected. -->
+    <button
+      appButton
+      [variant]="'secondary'"
+      type="button"
+      [disabled]="busy()"
+      (click)="onCancel()"
+    >
+      {{ cancelLabel() }}
+    </button>
+
+    <button
+      appButton
+      [variant]="confirmVariant()"
+      type="button"
+      [loading]="busy()"
+      (click)="onConfirm()"
+    >
+      {{ confirmLabel() }}
+    </button>
+  </div>
+</app-modal>

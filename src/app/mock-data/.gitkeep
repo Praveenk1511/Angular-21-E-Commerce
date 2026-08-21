@@ -1,0 +1,5 @@
+# Realistic seed data for the mock API layer.
+#
+# Only the mock API reads these files. Components, stores and services must never
+# import them directly, so replacing the mock API with a real REST backend stays
+# a one-layer change.

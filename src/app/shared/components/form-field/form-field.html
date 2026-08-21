@@ -1,0 +1,18 @@
+<div class="form-field">
+  <label class="form-field__label" [class.visually-hidden]="labelHidden()" [attr.for]="controlId()">
+    {{ label() }}
+    @if (required()) {
+      <!-- The asterisk is decorative; "required" is conveyed by the control's own
+           `required` attribute, which assistive technology already announces. -->
+      <span class="form-field__required" aria-hidden="true">*</span>
+    }
+  </label>
+
+  <ng-content />
+
+  @if (error()) {
+    <p class="form-field__error" [id]="errorId()">{{ error() }}</p>
+  } @else if (hint()) {
+    <p class="form-field__hint" [id]="hintId()">{{ hint() }}</p>
+  }
+</div>

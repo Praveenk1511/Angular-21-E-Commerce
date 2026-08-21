@@ -1,0 +1,40 @@
+<div class="checkbox">
+  <div class="checkbox__row">
+    <span class="checkbox__control">
+      <input
+        class="checkbox__native"
+        type="checkbox"
+        [id]="controlId"
+        [checked]="isChecked()"
+        [indeterminate]="indeterminate()"
+        [disabled]="isDisabled()"
+        [required]="required()"
+        [attr.aria-invalid]="error() ? 'true' : null"
+        [attr.aria-describedby]="describedBy()"
+        (change)="onChange($event)"
+        (blur)="markTouched()"
+      />
+
+      <span class="checkbox__box" aria-hidden="true">
+        @if (indeterminate()) {
+          <app-icon name="minus" [size]="14" />
+        } @else if (isChecked()) {
+          <app-icon name="check" [size]="14" />
+        }
+      </span>
+    </span>
+
+    <label class="checkbox__label" [attr.for]="controlId">
+      {{ label() }}
+      @if (required()) {
+        <span class="checkbox__required" aria-hidden="true">*</span>
+      }
+    </label>
+  </div>
+
+  @if (error()) {
+    <p class="checkbox__error" [id]="errorId">{{ error() }}</p>
+  } @else if (hint()) {
+    <p class="checkbox__hint" [id]="hintId">{{ hint() }}</p>
+  }
+</div>

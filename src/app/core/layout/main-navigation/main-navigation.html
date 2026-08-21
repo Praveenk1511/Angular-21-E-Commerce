@@ -1,0 +1,17 @@
+<nav class="main-navigation" [attr.aria-label]="label()">
+  <ul class="main-navigation__list" role="list">
+    @for (item of items(); track item.id) {
+      <li>
+        <a
+          class="main-navigation__link"
+          [routerLink]="item.url"
+          routerLinkActive="main-navigation__link--active"
+          ariaCurrentWhenActive="page"
+          [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+        >
+          {{ item.label }}
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

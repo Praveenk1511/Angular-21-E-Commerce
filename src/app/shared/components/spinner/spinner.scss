@@ -1,0 +1,40 @@
+:host {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--spinner-size, 24px);
+  block-size: var(--spinner-size, 24px);
+}
+
+.spinner__track {
+  inline-size: 100%;
+  block-size: 100%;
+  border: 2px solid currentcolor;
+  border-block-start-color: transparent;
+  border-radius: var(--radius-pill);
+  opacity: 0.85;
+  animation: spinner-rotate 700ms linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/*
+ * The global reduced-motion reset neutralises animations with `!important`, which
+ * would leave this spinner frozen — turning essential "something is happening"
+ * feedback into what looks like a broken control.
+ *
+ * Reduced motion means *reduced*, not absent, so the rotation is restored at a much
+ * calmer speed. `!important` is required here purely to outrank that global rule.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .spinner__track {
+    animation-name: spinner-rotate !important;
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

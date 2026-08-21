@@ -1,0 +1,39 @@
+@use 'sass:map';
+@use 'sass:math';
+
+/// Mobile-first breakpoints. Values are the *minimum* viewport width at which
+/// the named layout applies.
+$breakpoints: (
+  'sm': 576px,
+  'md': 768px,
+  'lg': 992px,
+  'xl': 1200px,
+  '2xl': 1400px,
+);
+
+/// Resolve a breakpoint by name, failing the build on typos.
+@function breakpoint($name) {
+  @if not map.has-key($breakpoints, $name) {
+    @error 'Unknown breakpoint `#{$name}`. Available: #{map.keys($breakpoints)}.';
+  }
+
+  @return map.get($breakpoints, $name);
+}
+
+/// Mobile-first media query.
+///
+/// Widths are emitted in `em` so the layout also responds to the user's browser
+/// font size, not just the viewport width.
+///
+/// @example scss
+///   .grid {
+///     grid-template-columns: 1fr;
+///     @include respond-to('md') {
+///       grid-template-columns: repeat(3, 1fr);
+///     }
+///   }
+@mixin respond-to($name) {
+  @media (min-width: #{math.div(breakpoint($name), 16px) * 1em}) {
+    @content;
+  }
+}

@@ -1,0 +1,57 @@
+@use 'breakpoints' as bp;
+
+.main-navigation__list {
+  /* Mobile: a stacked list inside the disclosure panel. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  /* Desktop: an inline bar. Same markup, same landmark, different axis. */
+  @include bp.respond-to('lg') {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-1);
+  }
+}
+
+/* Sidebar variant: never switches to a row, whatever the viewport. */
+:host(.main-navigation--stacked) .main-navigation__list {
+  @include bp.respond-to('lg') {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.main-navigation__link {
+  display: block;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+
+  @include bp.respond-to('lg') {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+
+  &:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface-muted);
+  }
+}
+
+:host(.main-navigation--stacked) .main-navigation__link {
+  @include bp.respond-to('lg') {
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+.main-navigation__link--active {
+  color: var(--color-accent);
+  background-color: var(--color-brand-50);
+}

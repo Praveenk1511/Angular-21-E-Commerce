@@ -1,0 +1,43 @@
+@use 'breakpoints' as bp;
+
+.site-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-text);
+  }
+}
+
+.site-logo__mark {
+  display: block;
+  line-height: 0;
+  color: var(--color-accent);
+}
+
+/* Styled here rather than with presentation attributes so the mark uses design
+   tokens instead of literal colours. */
+.site-logo__mark-plate {
+  fill: currentcolor;
+}
+
+.site-logo__mark-glyph {
+  fill: none;
+  stroke: var(--color-surface);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.site-logo__wordmark {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+
+  @include bp.respond-to('md') {
+    font-size: var(--font-size-xl);
+  }
+}

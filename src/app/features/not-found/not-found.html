@@ -1,0 +1,9 @@
+<app-page-container [size]="'narrow'">
+  <section class="not-found" aria-labelledby="not-found-title">
+    <p class="not-found__status" aria-hidden="true">404</p>
+    <h1 id="not-found-title" class="not-found__title">Page not found</h1>
+    <p class="not-found__message">The page you requested does not exist, or it may have moved.</p>
+
+    <a appButton [variant]="'primary'" [size]="'lg'" routerLink="/">Back to home</a>
+  </section>
+</app-page-container>
