@@ -1,0 +1,21 @@
+<section class="featured-categories" aria-labelledby="fc-heading">
+  <app-section-header
+    [heading]="'Shop by category'"
+    [subtitle]="'Browse our curated collections'"
+  />
+
+  <div class="featured-categories__grid">
+    @for (category of categories(); track category.id) {
+      <a class="featured-categories__card" [routerLink]="categoryUrl(category.slug)">
+        <span class="featured-categories__icon" aria-hidden="true">
+          {{ category.name[0] }}
+        </span>
+        <span class="featured-categories__name">{{ category.name }}</span>
+        <span class="featured-categories__count">
+          {{ category.totalProductCount }}
+          {{ category.totalProductCount === 1 ? 'product' : 'products' }}
+        </span>
+      </a>
+    }
+  </div>
+</section>

@@ -1,0 +1,12 @@
+<div class="section-header">
+  <div class="section-header__text">
+    <h2 class="section-header__heading">{{ heading() }}</h2>
+    @if (subtitle()) {
+      <p class="section-header__subtitle">{{ subtitle() }}</p>
+    }
+  </div>
+
+  @if (ctaLabel() && ctaUrl()) {
+    <a class="section-header__cta" [routerLink]="ctaUrl()">{{ ctaLabel() }}</a>
+  }
+</div>

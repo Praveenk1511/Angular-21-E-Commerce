@@ -1,8 +1,93 @@
-<app-page-container>
-  <section class="home" aria-labelledby="home-title">
-    <h1 id="home-title" class="home__title">{{ appName }}</h1>
-    <p class="home__lead">
-      The application shell is in place. Storefront features arrive in later phases.
-    </p>
-  </section>
-</app-page-container>
+<!-- 1. Hero Banner -->
+<app-hero />
+
+@if (store.error(); as errorMessage) {
+  <app-page-container>
+    <app-error-state [message]="errorMessage" (retry)="store.load()" />
+  </app-page-container>
+} @else if (store.loading()) {
+  <app-page-container>
+    <div class="home__loading" aria-busy="true">
+      <app-spinner [size]="32" [label]="'Loading home page'" />
+      <app-skeleton [lines]="2" [width]="'60%'" />
+      <div class="home__skeleton-grid">
+        <app-skeleton [variant]="'rect'" [height]="'14rem'" />
+        <app-skeleton [variant]="'rect'" [height]="'14rem'" />
+        <app-skeleton [variant]="'rect'" [height]="'14rem'" />
+        <app-skeleton [variant]="'rect'" [height]="'14rem'" />
+      </div>
+    </div>
+  </app-page-container>
+} @else {
+  <!-- 2. Featured Categories -->
+  @if (store.categories().length > 0) {
+    <app-page-container>
+      <app-featured-categories [categories]="store.categories()" />
+    </app-page-container>
+  }
+
+  <!-- 3. Featured Products -->
+  @if (store.featuredProducts().length > 0) {
+    <app-page-container>
+      <app-product-grid-section
+        [heading]="'Featured products'"
+        [subtitle]="'Handpicked by our team'"
+        [ctaLabel]="'View all'"
+        [ctaUrl]="productsUrl"
+        [products]="store.featuredProducts()"
+      />
+    </app-page-container>
+  }
+
+  <!-- 4. Bestsellers -->
+  @if (store.bestSellers().length > 0) {
+    <app-page-container>
+      <app-product-grid-section
+        [heading]="'Best sellers'"
+        [subtitle]="'Top rated by our customers'"
+        [ctaLabel]="'View all'"
+        [ctaUrl]="productsUrl"
+        [products]="store.bestSellers()"
+      />
+    </app-page-container>
+  }
+
+  <!-- 7. Promotional Banner -->
+  <app-promo-banner />
+
+  <!-- 5. New Arrivals -->
+  @if (store.newArrivals().length > 0) {
+    <app-page-container>
+      <app-product-grid-section
+        [heading]="'New arrivals'"
+        [subtitle]="'Just landed in the store'"
+        [ctaLabel]="'View all'"
+        [ctaUrl]="productsUrl"
+        [products]="store.newArrivals()"
+      />
+    </app-page-container>
+  }
+
+  <!-- 6. Deals / Offers -->
+  @if (store.deals().length > 0) {
+    <app-page-container>
+      <app-product-grid-section
+        [heading]="'Deals &amp; offers'"
+        [subtitle]="'Selected reductions'"
+        [ctaLabel]="'View all'"
+        [ctaUrl]="productsUrl"
+        [products]="store.deals()"
+      />
+    </app-page-container>
+  }
+
+  <!-- 8. Customer Benefits -->
+  <app-page-container>
+    <app-customer-benefits />
+  </app-page-container>
+
+  <!-- 9. Newsletter -->
+  <app-page-container>
+    <app-newsletter />
+  </app-page-container>
+}

@@ -1,0 +1,14 @@
+<section class="product-grid-section">
+  <app-section-header
+    [heading]="heading()"
+    [subtitle]="subtitle()"
+    [ctaLabel]="ctaLabel()"
+    [ctaUrl]="ctaUrl()"
+  />
+
+  <div class="product-grid-section__grid">
+    @for (product of products(); track product.id) {
+      <app-product-card [product]="product" />
+    }
+  </div>
+</section>

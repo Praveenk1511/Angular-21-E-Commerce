@@ -1,0 +1,52 @@
+@use 'breakpoints' as bp;
+@use 'mixins' as mx;
+
+.promo-banner {
+  background-color: var(--color-neutral-900);
+  color: var(--color-text-inverse);
+}
+
+.promo-banner__inner {
+  @include mx.container;
+
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--space-3);
+  padding-block: var(--space-6);
+
+  @include bp.respond-to('md') {
+    align-items: center;
+    text-align: center;
+    padding-block: var(--space-7);
+  }
+}
+
+.promo-banner__tagline {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-brand-300);
+}
+
+.promo-banner__heading {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+
+  @include bp.respond-to('md') {
+    font-size: var(--font-size-2xl);
+  }
+
+  strong {
+    color: var(--color-brand-300);
+  }
+}
+
+.promo-banner__detail {
+  margin: 0;
+  color: var(--color-neutral-400);
+  font-size: var(--font-size-sm);
+}

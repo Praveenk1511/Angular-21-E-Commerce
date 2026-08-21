@@ -1,0 +1,49 @@
+<article class="product-card" [class.product-card--unavailable]="isUnavailable()">
+  <div class="product-card__media">
+    <!-- Placeholder image: real assets do not exist in the mock, so a coloured
+         rectangle with the first letter of the product name stands in. -->
+    <span class="product-card__thumb" aria-hidden="true">
+      {{ product().name[0] }}
+    </span>
+
+    @if (badges().length > 0) {
+      <div class="product-card__badges">
+        @for (badge of badges(); track badge.label) {
+          <app-badge [variant]="badge.variant" [size]="'sm'">{{ badge.label }}</app-badge>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="product-card__body">
+    <h3 class="product-card__name">
+      <a class="product-card__link" [routerLink]="url()">{{ product().name }}</a>
+    </h3>
+
+    <p class="product-card__summary">{{ product().summary }}</p>
+
+    <div class="product-card__rating">
+      <app-rating
+        [rating]="product().rating.average"
+        [showValue]="false"
+        [label]="product().name + ' rating'"
+      />
+      <span class="product-card__review-count">({{ product().rating.count }})</span>
+    </div>
+
+    <div class="product-card__price">
+      <span class="product-card__current-price">
+        {{ product().price.amountMinor | price: product().price.currency }}
+      </span>
+      @if (hasCompareAt()) {
+        <span class="product-card__compare-price">
+          {{ product().price.compareAtMinor | price: product().price.currency }}
+        </span>
+      }
+    </div>
+
+    @if (isUnavailable()) {
+      <p class="product-card__stock">Out of stock</p>
+    }
+  </div>
+</article>

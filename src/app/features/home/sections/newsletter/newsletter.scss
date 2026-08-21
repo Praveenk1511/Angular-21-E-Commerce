@@ -1,0 +1,75 @@
+@use 'breakpoints' as bp;
+@use 'mixins' as mx;
+
+.newsletter {
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+
+  @include bp.respond-to('md') {
+    padding: var(--space-6);
+  }
+}
+
+.newsletter__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  @include bp.respond-to('md') {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.newsletter__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.newsletter__heading {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+
+  @include bp.respond-to('md') {
+    font-size: var(--font-size-xl);
+  }
+}
+
+.newsletter__subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  max-inline-size: 40ch;
+}
+
+.newsletter__form {
+  display: flex;
+  gap: var(--space-2);
+  inline-size: 100%;
+
+  @include bp.respond-to('md') {
+    max-inline-size: 22rem;
+  }
+
+  app-input {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+}
+
+.newsletter__success {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-success-50);
+  border: var(--border-width) solid var(--color-success-200);
+  color: var(--color-success-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}

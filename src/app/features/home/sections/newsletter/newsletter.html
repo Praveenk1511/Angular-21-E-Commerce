@@ -1,0 +1,29 @@
+<section class="newsletter" aria-label="Newsletter sign-up">
+  <div class="newsletter__inner">
+    <div class="newsletter__text">
+      <h2 class="newsletter__heading">Stay in the loop</h2>
+      <p class="newsletter__subtitle">
+        New products, restocks and the occasional discount — no more than once a week.
+      </p>
+    </div>
+
+    @if (submitted()) {
+      <p class="newsletter__success" role="status">
+        Thanks for subscribing! Check your inbox to confirm.
+      </p>
+    } @else {
+      <form class="newsletter__form" [formGroup]="form" (ngSubmit)="submit()">
+        <app-input
+          formControlName="email"
+          [label]="'Email address'"
+          [labelHidden]="true"
+          [type]="'email'"
+          [placeholder]="'you@example.com'"
+          [autocomplete]="'email'"
+          [error]="emailError()"
+        />
+        <button appButton type="submit">Subscribe</button>
+      </form>
+    }
+  </div>
+</section>

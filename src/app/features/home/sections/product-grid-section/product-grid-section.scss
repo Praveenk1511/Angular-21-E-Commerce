@@ -1,21 +1,10 @@
 @use 'breakpoints' as bp;
 
-:host {
-  display: block;
-}
-
-/* Loading skeleton layout */
-.home__loading {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding-block: var(--space-5);
-}
-
-.home__skeleton-grid {
+.product-grid-section__grid {
   display: grid;
   gap: var(--space-4);
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  margin-block-start: var(--space-4);
 
   @include bp.respond-to('lg') {
     grid-template-columns: repeat(4, 1fr);
