@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angu
 import { RouterLink } from '@angular/router';
 
 import { APP_URLS } from '@core/config/route-paths';
+import { SeoService } from '@core/services/seo.service';
 import { Badge } from '@shared/components/badge/badge';
 import { Breadcrumb } from '@shared/components/breadcrumb/breadcrumb';
 import { Button } from '@shared/components/button/button';
@@ -45,6 +46,7 @@ export class CategoryProducts {
   readonly slug = input.required<string>();
 
   protected readonly store = inject(CategoryStore);
+  private readonly seoService = inject(SeoService);
   protected readonly categoriesUrl = APP_URLS.categories;
 
   constructor() {
@@ -53,6 +55,18 @@ export class CategoryProducts {
       if (categorySlug) {
         this.store.loadCategoryBySlug(categorySlug);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+
+    effect(() => {
+      const cat = this.store.currentCategory();
+      if (cat) {
+        this.seoService.setSeoMetadata({
+          title: `${cat.name} — Premium Range`,
+          description: cat.description || `Browse the full range of ${cat.name} products at Lumen Store.`,
+          image: cat.imageUrl,
+          type: 'website',
+        });
       }
     });
   }

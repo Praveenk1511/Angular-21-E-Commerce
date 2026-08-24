@@ -165,12 +165,66 @@
               </span>
             </div>
 
+            <!-- PROMO CODE / COUPON INPUT SECTION -->
+            <div class="coupon-section">
+              @if (couponStore.appliedCoupon(); as coupon) {
+                <div class="applied-coupon-badge">
+                  <div class="applied-coupon-badge__info">
+                    <app-icon name="check-circle" [size]="16" />
+                    <strong>{{ coupon.code }}</strong>
+                    <span class="coupon-desc">{{ coupon.description }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="remove-coupon-btn"
+                    (click)="removeAppliedCoupon()"
+                    title="Remove Promo Code"
+                  >
+                    <app-icon name="close" [size]="14" />
+                  </button>
+                </div>
+              } @else {
+                <div class="coupon-input-group">
+                  <input
+                    type="text"
+                    [value]="couponInput()"
+                    (input)="couponInput.set($any($event.target).value)"
+                    placeholder="Enter promo code (e.g. WELCOME10)"
+                    class="coupon-input"
+                  />
+                  <button
+                    type="button"
+                    appButton
+                    variant="secondary"
+                    size="sm"
+                    (click)="applyCouponCode()"
+                  >
+                    Apply
+                  </button>
+                </div>
+                @if (couponStore.validationError()) {
+                  <span class="coupon-error-msg">{{ couponStore.validationError() }}</span>
+                }
+              }
+            </div>
+
+            @if (couponDiscountMinor() > 0) {
+              <div class="order-summary-card__row order-summary-card__row--coupon-discount">
+                <span class="order-summary-card__label">
+                  Coupon Discount ({{ couponStore.appliedCoupon()?.code }})
+                </span>
+                <span class="order-summary-card__value">
+                  -{{ couponDiscountMinor() | price: cart.cartItems()[0]?.price?.currency || 'GBP' }}
+                </span>
+              </div>
+            }
+
             <div class="order-summary-card__divider"></div>
 
             <div class="order-summary-card__row order-summary-card__row--total">
               <span class="order-summary-card__label">Grand Total</span>
               <span class="order-summary-card__value">
-                {{ cart.totalMinor() | price: cart.cartItems()[0]?.price?.currency || 'GBP' }}
+                {{ grandTotalWithCoupon() | price: cart.cartItems()[0]?.price?.currency || 'GBP' }}
               </span>
             </div>
           </div>

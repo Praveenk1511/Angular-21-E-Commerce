@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { APP_URLS } from '@core/config/route-paths';
@@ -11,6 +11,7 @@ import { QuantitySelector } from '@shared/components/quantity-selector/quantity-
 import { ToastService } from '@shared/components/toast/toast.service';
 import { PricePipe } from '@shared/pipes/price.pipe';
 import { CartStore } from '@state/cart.store';
+import { CouponStore } from '@state/coupon.store';
 
 /**
  * Shopping Cart Page (/cart).
@@ -37,10 +38,47 @@ import { CartStore } from '@state/cart.store';
 })
 export class CartPage {
   protected readonly cart = inject(CartStore);
+  protected readonly couponStore = inject(CouponStore);
   private readonly toast = inject(ToastService);
 
   protected readonly productsUrl = APP_URLS.products;
   protected readonly checkoutUrl = APP_URLS.checkout;
+
+  protected couponInput = signal<string>('');
+
+  protected readonly couponDiscountMinor = computed(() => {
+    const applied = this.couponStore.appliedCoupon();
+    if (!applied) return 0;
+    const res = this.couponStore.validateCoupon(applied.code, this.cart.subtotalMinor());
+    return res.valid ? res.discountMinor : 0;
+  });
+
+  protected readonly grandTotalWithCoupon = computed(() => {
+    const total = this.cart.totalMinor();
+    const discount = this.couponDiscountMinor();
+    return Math.max(0, total - discount);
+  });
+
+  protected applyCouponCode(): void {
+    const code = this.couponInput().trim();
+    if (!code) {
+      this.toast.error('Promo Code Required', 'Please enter a valid coupon code.');
+      return;
+    }
+
+    const res = this.couponStore.applyCoupon(code, this.cart.subtotalMinor());
+    if (res.valid) {
+      this.toast.success('Coupon Applied', res.message);
+      this.couponInput.set('');
+    } else {
+      this.toast.error('Coupon Validation Error', res.message);
+    }
+  }
+
+  protected removeAppliedCoupon(): void {
+    this.couponStore.removeCoupon();
+    this.toast.show({ variant: 'info', title: 'Coupon Removed', message: 'Promo code removed from your order.' });
+  }
 
   protected getItemUrl(slug: string): string {
     return APP_URLS.productDetail(slug);

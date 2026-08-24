@@ -1,0 +1,130 @@
+<div class="admin-reports">
+  <!-- PAGE HEADER & TIMEFRAME SELECTOR -->
+  <header class="reports-header">
+    <div class="reports-header__title-group">
+      <h1 class="reports-header__title">Analytics & Reports</h1>
+      <p class="reports-header__subtitle">
+        Performance metrics, revenue trends, customer acquisition growth, product sales, and inventory distribution.
+      </p>
+    </div>
+
+    <!-- TIMEFRAME GRANULARITY BAR -->
+    <nav class="timeframe-bar" aria-label="Timeframe Granularity">
+      @for (tf of ['daily', 'weekly', 'monthly', 'yearly']; track tf) {
+        <button
+          type="button"
+          class="timeframe-pill"
+          [class.timeframe-pill--active]="store.timeframe() === tf"
+          (click)="store.setTimeframe($any(tf))"
+        >
+          {{ tf }}
+        </button>
+      }
+    </nav>
+  </header>
+
+  <!-- KPI SUMMARY CARDS -->
+  <div class="kpi-metrics-grid">
+    @for (card of store.metricsSummary(); track card.title) {
+      <div class="kpi-metric-card">
+        <div class="kpi-metric-card__top">
+          <span class="kpi-title">{{ card.title }}</span>
+          <app-badge [variant]="card.isPositive ? 'success' : 'danger'" size="sm">
+            {{ card.isPositive ? '+' : '' }}{{ card.changePct }}%
+          </app-badge>
+        </div>
+        <strong class="kpi-value">{{ card.value }}</strong>
+        <span class="kpi-subtext">vs previous {{ store.timeframe() }} period</span>
+      </div>
+    }
+  </div>
+
+  <!-- REPORT CATEGORY NAV TABS -->
+  <nav class="report-tabs-bar" aria-label="Report Category Tabs">
+    @for (tab of ['overview', 'revenue', 'orders', 'customers', 'products', 'categories', 'inventory']; track tab) {
+      <button
+        type="button"
+        class="report-tab"
+        [class.report-tab--active]="store.activeTab() === tab"
+        (click)="store.setActiveTab($any(tab))"
+      >
+        <span class="report-tab__label">{{ tab }}</span>
+      </button>
+    }
+  </nav>
+
+  <!-- CHARTS & REPORT PANELS -->
+  <div class="charts-grid">
+    @if (store.activeTab() === 'overview' || store.activeTab() === 'revenue') {
+      <!-- Revenue Trend Line Chart -->
+      <div class="chart-col col-span-2">
+        <app-admin-chart
+          type="line"
+          [title]="'Revenue Trend (' + store.timeframe() + ')'"
+          [unit]="'GBP'"
+          [data]="store.revenueData()"
+        />
+      </div>
+    }
+
+    @if (store.activeTab() === 'overview' || store.activeTab() === 'orders') {
+      <!-- Orders Volume Bar Chart -->
+      <div class="chart-col">
+        <app-admin-chart
+          type="bar"
+          [title]="'Orders Volume (' + store.timeframe() + ')'"
+          [unit]="'orders'"
+          [data]="store.ordersData()"
+        />
+      </div>
+    }
+
+    @if (store.activeTab() === 'overview' || store.activeTab() === 'products') {
+      <!-- Top Selling Products Bar Chart -->
+      <div class="chart-col">
+        <app-admin-chart
+          type="bar"
+          title="Top Selling Catalog Products"
+          unit="units"
+          [data]="store.topProductsData()"
+        />
+      </div>
+    }
+
+    @if (store.activeTab() === 'overview' || store.activeTab() === 'categories') {
+      <!-- Category Revenue Share Donut Chart -->
+      <div class="chart-col">
+        <app-admin-chart
+          type="donut"
+          title="Category Revenue Share"
+          unit="%"
+          [data]="store.topCategoriesData()"
+        />
+      </div>
+    }
+
+    @if (store.activeTab() === 'customers') {
+      <!-- Customer Growth Line Chart -->
+      <div class="chart-col col-span-2">
+        <app-admin-chart
+          type="line"
+          title="Customer Acquisition & Account Growth"
+          unit="users"
+          [data]="store.customerGrowthData()"
+        />
+      </div>
+    }
+
+    @if (store.activeTab() === 'inventory') {
+      <!-- Inventory Distribution Chart -->
+      <div class="chart-col col-span-2">
+        <app-admin-chart
+          type="bar"
+          title="Warehouse Inventory Stock Health Distribution"
+          unit="items"
+          [data]="store.inventoryHealthData()"
+        />
+      </div>
+    }
+  </div>
+</div>

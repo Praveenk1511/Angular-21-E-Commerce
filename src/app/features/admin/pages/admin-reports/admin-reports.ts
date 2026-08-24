@@ -1,17 +1,26 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
-import { PlaceholderPage } from '@shared/components/placeholder-page/placeholder-page';
+import { AdminChartComponent } from '@shared/components/admin-chart/admin-chart';
+import { Badge } from '@shared/components/badge/badge';
+import { AdminReportsStore } from '@state/admin-reports.store';
 
-/** Route placeholder for reporting. Replaced by the admin phase. */
+/**
+ * Admin Analytics & Reporting Page (/admin/reports).
+ *
+ * Renders multi-timeframe analytics (Daily, Weekly, Monthly, Yearly), report category tabs
+ * (Revenue, Sales, Orders, Customers, Products, Categories, Inventory), KPI Delta Cards,
+ * and uses the modular AdminChartComponent abstraction (Line, Bar, Donut SVG charts).
+ */
 @Component({
   selector: 'app-admin-reports',
-  imports: [PlaceholderPage],
-  template: `
-    <app-placeholder-page
-      heading="Reports"
-      description="Sales and inventory reports will appear here."
-    />
-  `,
+  imports: [
+    AdminChartComponent,
+    Badge,
+  ],
+  templateUrl: './admin-reports.html',
+  styleUrl: './admin-reports.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminReports {}
+export class AdminReports {
+  protected readonly store = inject(AdminReportsStore);
+}

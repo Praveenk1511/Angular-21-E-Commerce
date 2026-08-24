@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { APP_URLS } from '@core/config/route-paths';
+import { SeoService } from '@core/services/seo.service';
 import { ErrorState } from '@shared/components/error-state/error-state';
 import { PageContainer } from '@shared/components/page-container/page-container';
 import { Skeleton } from '@shared/components/skeleton/skeleton';
@@ -43,9 +44,26 @@ import { PromoBanner } from './sections/promo-banner/promo-banner';
 })
 export class Home {
   protected readonly store = inject(HomeStore);
+  private readonly seoService = inject(SeoService);
   protected readonly productsUrl = APP_URLS.products;
 
   constructor() {
     this.store.load();
+
+    this.seoService.setSeoMetadata({
+      title: 'Lumen — Modern Electronics, Workstation & Audio Essentials',
+      description: 'Discover premium workstation setup essentials, studio audio equipment, ergonomic office furniture, and high-performance tech accessories at Lumen Store.',
+      type: 'website',
+      keywords: ['electronics', 'workstation', 'audio', 'headphones', 'ergonomic desk', 'tech accessories'],
+    });
+
+    this.seoService.setJsonLdSchema({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Lumen Store',
+      url: 'https://lumen-store.example.com',
+      logo: 'https://lumen-store.example.com/assets/images/lumen-logo.png',
+      description: 'Premium workstation setup essentials, audio equipment, and tech accessories.',
+    });
   }
 }

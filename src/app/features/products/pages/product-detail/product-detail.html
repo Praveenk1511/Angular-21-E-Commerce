@@ -240,8 +240,14 @@
         }
       </section>
 
-      <!-- Product Reviews & Rating System -->
-      <app-product-reviews [productId]="product.id" [productName]="product.name" />
+      <!-- Product Reviews & Rating System (Deferred for Viewport Loading Optimization) -->
+      @defer (on viewport) {
+        <app-product-reviews [productId]="product.id" [productName]="product.name" />
+      } @placeholder {
+        <div class="product-reviews-placeholder" aria-hidden="true">
+          <app-spinner [size]="24" [label]="'Loading reviews...'" />
+        </div>
+      }
 
       <!-- Related Products -->
       @if (store.relatedProducts().length > 0) {

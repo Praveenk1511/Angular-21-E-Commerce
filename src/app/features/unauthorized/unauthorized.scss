@@ -1,0 +1,106 @@
+@use 'mixins' as mx;
+
+:host {
+  display: block;
+  padding-block: var(--space-8);
+}
+
+.unauthorized-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.unauthorized-card {
+  @include mx.surface;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-5);
+  max-width: 520px;
+  width: 100%;
+  padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-xl, 1rem);
+  box-shadow: var(--shadow-lg);
+
+  &__icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background-color: #fef2f2;
+    border-radius: 9999px;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .error-code {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-danger, #ef4444);
+    letter-spacing: 0.1em;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+  }
+
+  &__description {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  &__note {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-4);
+    width: 100%;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.icon-danger {
+  color: var(--color-danger, #ef4444);
+}
+
+.user-role-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+
+  &__label {
+    color: var(--color-text-muted);
+  }
+
+  &__name {
+    color: var(--color-text);
+  }
+}

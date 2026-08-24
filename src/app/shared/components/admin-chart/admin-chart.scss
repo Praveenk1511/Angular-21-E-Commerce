@@ -1,0 +1,189 @@
+@use 'breakpoints' as bp;
+@use 'mixins' as mx;
+
+.admin-chart-card {
+  @include mx.surface;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 0.75rem);
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &__title {
+      margin: 0;
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    &__unit {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+  }
+
+  .chart-body {
+    width: 100%;
+  }
+}
+
+/* LINE CHART STYLES */
+.line-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.line-chart-svg {
+  width: 100%;
+  height: 180px;
+}
+
+.line-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .label-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+
+    .val-txt {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .lbl-txt {
+      font-size: 0.6875rem;
+      color: var(--color-text-muted);
+    }
+  }
+}
+
+/* BAR CHART STYLES */
+.bar-chart-container {
+  padding-top: var(--space-4);
+}
+
+.bars-wrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 200px;
+  gap: var(--space-2);
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+
+  &__tooltip {
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-1);
+  }
+
+  &__fill {
+    width: 100%;
+    max-width: 48px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: height 0.3s ease;
+  }
+
+  &__label {
+    margin-top: var(--space-2);
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+}
+
+/* DONUT CHART STYLES */
+.donut-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+
+  @include bp.respond-to('md') {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+}
+
+.donut-svg-wrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .total-label {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+  }
+
+  .total-value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+  }
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+  }
+
+  .legend-name {
+    color: var(--color-text-muted);
+  }
+
+  .legend-val {
+    margin-left: auto;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+  }
+}

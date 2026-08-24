@@ -58,6 +58,20 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/admin-inventory/admin-inventory').then((m) => m.AdminInventory),
       },
+      {
+        path: 'coupons',
+        title: 'Coupons & Promotions',
+        data: { breadcrumb: 'Coupons' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./pages/admin-coupons/admin-coupons').then((m) => m.AdminCoupons),
+      },
+      {
+        path: 'reports',
+        title: 'Analytics & Reports',
+        data: { breadcrumb: 'Reports' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./pages/admin-reports/admin-reports').then((m) => m.AdminReports),
+      },
     ],
   },
 ];

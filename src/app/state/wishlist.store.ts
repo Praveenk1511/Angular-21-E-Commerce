@@ -26,6 +26,8 @@ export class WishlistStore {
   // ---------- Public Derived State ----------
   readonly wishlistItems = this.items.asReadonly();
 
+  readonly wishlistedProductIds = computed(() => new Set(this.items().map((i) => i.productId)));
+
   readonly isEmpty = computed(() => this.items().length === 0);
 
   readonly wishlistCount = computed(() => this.items().length);
@@ -40,7 +42,7 @@ export class WishlistStore {
    * Checks if a product is saved in the wishlist.
    */
   isWishlisted(productId: string): boolean {
-    return this.items().some((item) => item.productId === productId);
+    return this.wishlistedProductIds().has(productId);
   }
 
   /**

@@ -1,0 +1,168 @@
+@use 'breakpoints' as bp;
+@use 'mixins' as mx;
+
+.admin-reports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ---------- HEADER & TIMEFRAME ---------- */
+.reports-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  @include bp.respond-to('md') {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+}
+
+.timeframe-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.25rem;
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.timeframe-pill {
+  padding: 0.375rem 0.875rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    color: var(--color-text);
+  }
+
+  &--active {
+    background-color: var(--color-surface);
+    color: var(--color-brand-primary, #2563eb);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ---------- KPI METRICS GRID ---------- */
+.kpi-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--space-4);
+
+  @include bp.respond-to('sm') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include bp.respond-to('lg') {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.kpi-metric-card {
+  @include mx.surface;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 0.75rem);
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .kpi-title {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-muted);
+  }
+
+  .kpi-value {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+  }
+
+  .kpi-subtext {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+  }
+}
+
+/* ---------- REPORT CATEGORY TABS ---------- */
+.report-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.report-tab {
+  padding: 0.625rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--color-text);
+  }
+
+  &--active {
+    color: var(--color-brand-primary, #2563eb);
+    border-bottom-color: var(--color-brand-primary, #2563eb);
+  }
+}
+
+/* ---------- CHARTS GRID ---------- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--space-6);
+
+  @include bp.respond-to('lg') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.chart-col {
+  width: 100%;
+
+  &.col-span-2 {
+    @include bp.respond-to('lg') {
+      grid-column: span 2;
+    }
+  }
+}

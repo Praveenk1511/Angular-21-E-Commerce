@@ -1,17 +1,13 @@
 import { inject } from '@angular/core';
-import type { CanActivateFn } from '@angular/router';
-import { Router } from '@angular/router';
+import { Router, type CanActivateFn } from '@angular/router';
 
 import { APP_URLS } from '@core/config/route-paths';
 import { AuthStore } from '@state/auth.store';
 
 /**
- * Redirects unauthenticated users to the login page.
- *
- * Does not check roles — that is `adminGuard`'s job. Separating the two means a route
- * can require auth without also requiring a specific privilege.
+ * Redirects unauthenticated users to the login page with queryParam returnUrl.
  */
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthStore);
   const router = inject(Router);
 
@@ -19,14 +15,13 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
-  return router.createUrlTree([APP_URLS.auth.login]);
+  return router.createUrlTree([APP_URLS.auth.login], {
+    queryParams: { returnUrl: state.url },
+  });
 };
 
 /**
  * Redirects authenticated users away from the login/register pages.
- *
- * An already-signed-in user landing on `/auth/login` is confusing rather than useful,
- * so they are sent to the home page instead. Used on the auth layout route.
  */
 export const guestOnlyGuard: CanActivateFn = () => {
   const auth = inject(AuthStore);
@@ -40,18 +35,19 @@ export const guestOnlyGuard: CanActivateFn = () => {
 };
 
 /**
- * Requires admin or manager role.
- *
- * Sits *after* `authGuard` in the chain, so by the time this runs the user is known to
- * be authenticated. A non-admin authenticated user is sent home rather than to login.
+ * Requires admin or manager role. Redirects non-authorized authenticated users to /unauthorized.
  */
 export const adminGuard: CanActivateFn = () => {
   const auth = inject(AuthStore);
   const router = inject(Router);
 
+  if (!auth.isAuthenticated()) {
+    return router.createUrlTree([APP_URLS.auth.login]);
+  }
+
   if (auth.isManager()) {
     return true;
   }
 
-  return router.createUrlTree([APP_URLS.home]);
+  return router.createUrlTree(['/unauthorized']);
 };

@@ -1,0 +1,381 @@
+<div class="admin-coupons">
+  <!-- PAGE HEADER & CONTROLS -->
+  <header class="coupons-header">
+    <div class="coupons-header__title-group">
+      <h1 class="coupons-header__title">Coupon & Promotions Management</h1>
+      <p class="coupons-header__subtitle">
+        Create promotional discount codes, set minimum spend rules, expiry dates, usage caps, and manage active status.
+      </p>
+    </div>
+
+    <div class="coupons-header__action">
+      <button type="button" appButton variant="primary" size="md" (click)="openAddModal()">
+        <app-icon name="plus" [size]="18" />
+        Add New Coupon
+      </button>
+    </div>
+  </header>
+
+  <!-- SEARCH & STATUS FILTER BAR -->
+  <div class="coupons-controls">
+    <div class="coupons-controls__search">
+      <app-icon name="search" [size]="18" class="search-icon" />
+      <input
+        type="search"
+        [value]="store.searchQuery()"
+        (input)="store.setSearchQuery($any($event.target).value)"
+        placeholder="Search coupons by code or description..."
+        class="search-input"
+      />
+      @if (store.searchQuery()) {
+        <button
+          type="button"
+          class="search-clear-btn"
+          (click)="store.setSearchQuery('')"
+          aria-label="Clear search"
+        >
+          <app-icon name="close" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <!-- STATUS FILTER PILLS -->
+    <nav class="status-pills-bar" aria-label="Coupon Status Filter">
+      @for (st of ['all', 'active', 'scheduled', 'expired', 'exhausted', 'disabled']; track st) {
+        <button
+          type="button"
+          class="status-pill"
+          [class.status-pill--active]="store.statusFilter() === st"
+          (click)="store.setStatusFilter($any(st))"
+        >
+          {{ st === 'all' ? 'All Coupons' : st }}
+        </button>
+      }
+    </nav>
+  </div>
+
+  <!-- COUPON DATA TABLE -->
+  @if (store.paginatedData().items.length === 0) {
+    <div class="coupons-empty">
+      <app-empty-state
+        [heading]="'No coupons found'"
+        [description]="'No promotional coupons match your search query or selected status filter.'"
+      />
+    </div>
+  } @else {
+    <div class="coupons-table-card">
+      <div class="table-container">
+        <table class="coupons-table">
+          <thead>
+            <tr>
+              <th>Promo Code</th>
+              <th>Type / Discount</th>
+              <th>Minimum Spend</th>
+              <th>Usage Ratio</th>
+              <th>Expiry Date</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cpn of store.paginatedData().items; track cpn.id) {
+              <tr>
+                <td>
+                  <div class="code-cell">
+                    <strong class="code-tag">{{ cpn.code }}</strong>
+                    <span class="code-desc">{{ cpn.description }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="value-cell">
+                    @if (cpn.kind === 'percentage') {
+                      <strong class="value-amount">{{ cpn.value }}% OFF</strong>
+                      @if (cpn.maximumDiscountMinor) {
+                        <span class="value-cap">Max {{ cpn.maximumDiscountMinor | price: cpn.currency }}</span>
+                      }
+                    } @else if (cpn.kind === 'fixed') {
+                      <strong class="value-amount">{{ cpn.value | price: cpn.currency }} OFF</strong>
+                    } @else {
+                      <strong class="value-amount">FREE SHIPPING</strong>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="spend-text">
+                    {{ cpn.minimumSpendMinor > 0 ? (cpn.minimumSpendMinor | price: cpn.currency) : 'No Min' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="usage-text">
+                    {{ cpn.usageCount }} / {{ cpn.usageLimit !== null ? cpn.usageLimit : '∞' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="date-cell">
+                    {{ cpn.endsAt ? (cpn.endsAt | date: 'mediumDate') : 'Never' }}
+                  </span>
+                </td>
+                <td>
+                  <app-badge [variant]="getCouponBadgeVariant(cpn.status)" size="sm">
+                    {{ cpn.status }}
+                  </app-badge>
+                </td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="toggleCouponStatus(cpn)"
+                      [title]="cpn.status === 'disabled' ? 'Activate Coupon' : 'Disable Coupon'"
+                    >
+                      <app-icon [name]="cpn.status === 'disabled' ? 'check' : 'close'" [size]="16" />
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="openEditModal(cpn)"
+                      title="Edit Coupon"
+                    >
+                      <app-icon name="star" [size]="16" />
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn action-btn--danger"
+                      (click)="store.promptDelete(cpn)"
+                      title="Delete Coupon"
+                    >
+                      <app-icon name="close" [size]="16" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGINATION BAR -->
+    @if (store.paginatedData().totalPages > 1) {
+      <nav class="coupons-pagination" aria-label="Coupons Pagination">
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === 1"
+          (click)="store.setPage(store.paginatedData().currentPage - 1)"
+        >
+          <app-icon name="chevron-left" [size]="16" />
+          Previous
+        </button>
+
+        <div class="pagination-pages">
+          @for (p of [].constructor(store.paginatedData().totalPages); track $index; let pageNum = $index) {
+            <button
+              type="button"
+              class="pagination-num"
+              [class.pagination-num--active]="store.paginatedData().currentPage === (pageNum + 1)"
+              (click)="store.setPage(pageNum + 1)"
+            >
+              {{ pageNum + 1 }}
+            </button>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === store.paginatedData().totalPages"
+          (click)="store.setPage(store.paginatedData().currentPage + 1)"
+        >
+          Next
+          <app-icon name="chevron-right" [size]="16" />
+        </button>
+      </nav>
+    }
+  }
+
+  <!-- ADD / EDIT COUPON MODAL OVERLAY -->
+  @if (store.isFormOpen()) {
+    <div class="modal-backdrop" (click)="store.closeModals()">
+      <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header">
+          <h2 class="modal-card__title">
+            {{ store.editingCoupon() ? 'Edit Coupon' : 'Create New Coupon' }}
+          </h2>
+          <button type="button" class="modal-card__close" (click)="store.closeModals()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <form [formGroup]="couponForm" (ngSubmit)="saveCoupon()" class="coupon-form">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cpn-code" class="form-label">Promo Code *</label>
+              <input
+                id="cpn-code"
+                type="text"
+                formControlName="code"
+                class="form-control uppercase"
+                [class.form-control--error]="isControlInvalid('code')"
+                placeholder="e.g. SUMMER20"
+              />
+              @if (isControlInvalid('code')) {
+                <span class="form-error">Valid code required.</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="cpn-kind" class="form-label">Discount Type *</label>
+              <select id="cpn-kind" formControlName="kind" class="form-control">
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount (£)</option>
+                <option value="free-shipping">Free Shipping</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cpn-desc" class="form-label">Description *</label>
+            <input
+              id="cpn-desc"
+              type="text"
+              formControlName="description"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('description')"
+              placeholder="e.g. 20% off your summer workstation upgrades."
+            />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cpn-val" class="form-label">Discount Value *</label>
+              <input
+                id="cpn-val"
+                type="number"
+                step="0.01"
+                formControlName="value"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('value')"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cpn-min" class="form-label">Minimum Order (£) *</label>
+              <input
+                id="cpn-min"
+                type="number"
+                step="0.01"
+                formControlName="minimumSpend"
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cpn-max" class="form-label">Max Discount Cap (£)</label>
+              <input
+                id="cpn-max"
+                type="number"
+                step="0.01"
+                formControlName="maximumDiscount"
+                class="form-control"
+                placeholder="Optional percentage cap"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cpn-limit" class="form-label">Usage Limit (Max Uses)</label>
+              <input
+                id="cpn-limit"
+                type="number"
+                formControlName="usageLimit"
+                class="form-control"
+                placeholder="Leave blank for unlimited"
+              />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cpn-start" class="form-label">Start Date *</label>
+              <input
+                id="cpn-start"
+                type="datetime-local"
+                formControlName="startsAt"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cpn-end" class="form-label">Expiry Date</label>
+              <input
+                id="cpn-end"
+                type="datetime-local"
+                formControlName="endsAt"
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cpn-status" class="form-label">Status *</label>
+            <select id="cpn-status" formControlName="status" class="form-control">
+              <option value="active">Active</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </div>
+
+          <div class="modal-card__footer">
+            <button type="button" appButton variant="secondary" size="md" (click)="store.closeModals()">
+              Cancel
+            </button>
+            <button type="submit" appButton variant="primary" size="md">
+              Save Coupon
+              <app-icon name="check" [size]="16" />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- DESTRUCTIVE ACTION CONFIRMATION DIALOG MODAL -->
+  @if (store.confirmingDeleteCoupon(); as delCpn) {
+    <div class="modal-backdrop" (click)="store.cancelDelete()">
+      <div class="modal-card modal-card--danger" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header modal-card__header--danger">
+          <div class="danger-title-row">
+            <app-icon name="alert-triangle" [size]="22" class="text-danger" />
+            <h2 class="modal-card__title">Delete Promo Code?</h2>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.cancelDelete()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <div class="modal-card__body">
+          <p>
+            Are you sure you want to permanently delete promo code <strong>"{{ delCpn.code }}"</strong>?
+          </p>
+          <div class="danger-warning-box">
+            <app-icon name="info" [size]="18" />
+            <p>
+              This action cannot be undone. Customers will no longer be able to apply this promotional code at checkout.
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" appButton variant="secondary" size="md" (click)="store.cancelDelete()">
+            Cancel
+          </button>
+          <button type="button" appButton variant="danger" size="md" (click)="confirmDeleteCoupon()">
+            Yes, Delete Promo Code
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

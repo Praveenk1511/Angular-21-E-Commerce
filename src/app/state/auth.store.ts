@@ -93,6 +93,26 @@ export class AuthStore {
     return u ? `${u.firstName} ${u.lastName}` : null;
   });
 
+  /**
+   * Helper to check if current user holds any of the given roles.
+   */
+  hasRole(roles: readonly string[]): boolean {
+    const userRole = this.user()?.role;
+    return !!(userRole && roles.includes(userRole));
+  }
+
+  /**
+   * Helper to check granular user permission flags.
+   */
+  hasPermission(permission: string): boolean {
+    const role = this.user()?.role;
+    if (role === 'admin') return true;
+    if (role === 'manager') {
+      return permission !== 'manage_users' && permission !== 'system_settings';
+    }
+    return false;
+  }
+
   // ---------- Commands ----------
 
   /**

@@ -1,0 +1,94 @@
+<div class="admin-chart-card">
+  @if (title()) {
+    <header class="chart-header">
+      <h3 class="chart-header__title">{{ title() }}</h3>
+      @if (unit()) {
+        <span class="chart-header__unit">({{ unit() }})</span>
+      }
+    </header>
+  }
+
+  <div class="chart-body">
+    <!-- LINE CHART -->
+    @if (type() === 'line') {
+      <div class="line-chart-container">
+        <svg viewBox="0 0 480 180" class="line-chart-svg" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="chartLineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          <polygon [attr.points]="areaPoints()" fill="url(#chartLineGrad)" />
+          <polyline [attr.points]="linePoints()" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" />
+        </svg>
+
+        <div class="line-labels">
+          @for (item of data(); track item.label) {
+            <div class="label-col">
+              <span class="val-txt">{{ item.formattedValue || (item.value + ' ' + unit()) }}</span>
+              <span class="lbl-txt">{{ item.label }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- BAR CHART -->
+    @if (type() === 'bar') {
+      <div class="bar-chart-container">
+        <div class="bars-wrapper">
+          @for (item of data(); track item.label) {
+            <div class="bar-col">
+              <div class="bar-col__tooltip">
+                {{ item.formattedValue || item.value }}
+              </div>
+              <div
+                class="bar-col__fill"
+                [style.height.%]="getBarHeightPct(item.value)"
+                [style.background-color]="item.color || '#2563eb'"
+              ></div>
+              <span class="bar-col__label">{{ item.label }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- DONUT CHART -->
+    @if (type() === 'donut') {
+      <div class="donut-chart-container">
+        <div class="donut-svg-wrapper">
+          <svg viewBox="0 0 100 100" class="donut-svg">
+            @for (item of data(); track item.label; let i = $index) {
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="transparent"
+                [attr.stroke]="item.color || '#2563eb'"
+                stroke-width="14"
+                [attr.stroke-dasharray]="getDonutSegment(item.value, getCumulativeValues()[i]!).strokeDash"
+                [attr.stroke-dashoffset]="getDonutSegment(item.value, getCumulativeValues()[i]!).strokeOffset"
+              />
+            }
+          </svg>
+          <div class="donut-center">
+            <span class="total-label">Total</span>
+            <strong class="total-value">{{ totalVal() }}</strong>
+          </div>
+        </div>
+
+        <div class="donut-legend">
+          @for (item of data(); track item.label) {
+            <div class="legend-item">
+              <span class="legend-dot" [style.background-color]="item.color || '#2563eb'"></span>
+              <span class="legend-name">{{ item.label }}</span>
+              <strong class="legend-val">{{ item.formattedValue || item.value }}</strong>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

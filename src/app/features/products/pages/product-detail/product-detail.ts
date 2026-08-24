@@ -9,6 +9,7 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { APP_URLS } from '@core/config/route-paths';
+import { SeoService } from '@core/services/seo.service';
 import { Badge } from '@shared/components/badge/badge';
 import { Breadcrumb } from '@shared/components/breadcrumb/breadcrumb';
 import { Button } from '@shared/components/button/button';
@@ -66,6 +67,7 @@ export class ProductDetail {
   protected readonly store = inject(ProductDetailStore);
   private readonly cartStore = inject(CartStore);
   protected readonly wishlistStore = inject(WishlistStore);
+  private readonly seoService = inject(SeoService);
   private readonly toast = inject(ToastService);
   protected readonly productsUrl = APP_URLS.products;
 
@@ -80,6 +82,37 @@ export class ProductDetail {
       if (productId) {
         this.store.loadProduct(productId);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+
+    effect(() => {
+      const prod = this.store.product();
+      if (prod) {
+        // Apply Product SEO Metadata
+        this.seoService.setSeoMetadata({
+          title: prod.name,
+          description: prod.summary || `Buy ${prod.name} at Lumen Store.`,
+          image: prod.thumbnail.url,
+          type: 'product',
+        });
+
+        // Apply Google Schema.org Product JSON-LD
+        this.seoService.setJsonLdSchema({
+          '@context': 'https://schema.org/',
+          '@type': 'Product',
+          name: prod.name,
+          image: [prod.thumbnail.url],
+          description: prod.summary,
+          sku: prod.sku,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: prod.price.currency,
+            price: (prod.price.amountMinor / 100).toFixed(2),
+            availability: prod.stock.status === 'out-of-stock'
+              ? 'https://schema.org/OutOfStock'
+              : 'https://schema.org/InStock',
+          },
+        });
       }
     });
   }

@@ -121,7 +121,15 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'unauthorized',
+        title: '403 Access Denied',
+        data: { breadcrumb: 'Unauthorized' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('@features/unauthorized/unauthorized').then((m) => m.UnauthorizedPage),
+      },
+      {
         path: SEGMENTS.admin,
+        canMatch: [authGuard, adminGuard],
         loadChildren: () => import('@features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
 

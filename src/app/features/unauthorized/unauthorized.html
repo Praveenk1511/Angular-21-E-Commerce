@@ -1,0 +1,44 @@
+<app-page-container>
+  <div class="unauthorized-page">
+    <div class="unauthorized-card">
+      <div class="unauthorized-card__icon-wrapper">
+        <app-icon name="alert-triangle" [size]="48" class="icon-danger" />
+      </div>
+
+      <header class="unauthorized-card__header">
+        <span class="error-code">403 FORBIDDEN</span>
+        <h1 class="unauthorized-card__title">Access Denied</h1>
+        <p class="unauthorized-card__description">
+          You do not have the required role or administrative permissions to access this page.
+        </p>
+      </header>
+
+      @if (auth.currentUser(); as user) {
+        <div class="user-role-box">
+          <span class="user-role-box__label">Signed in as:</span>
+          <strong class="user-role-box__name">{{ user.firstName }} {{ user.lastName }}</strong>
+          <app-badge variant="neutral" size="sm">
+            ROLE: {{ user.role | uppercase }}
+          </app-badge>
+        </div>
+      }
+
+      <div class="unauthorized-card__actions">
+        <a [routerLink]="homeUrl" appButton variant="primary" size="lg">
+          <app-icon name="chevron-left" [size]="18" />
+          Return to Storefront
+        </a>
+
+        <button type="button" appButton variant="secondary" size="lg" (click)="logout()">
+          Sign Out & Switch Account
+        </button>
+      </div>
+
+      <footer class="unauthorized-card__note">
+        <p>
+          Need access to administrator controls? Contact your store administrator or manager to request role promotion.
+        </p>
+      </footer>
+    </div>
+  </div>
+</app-page-container>
