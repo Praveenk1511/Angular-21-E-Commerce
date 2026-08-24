@@ -17,6 +17,7 @@ import { ErrorState } from '@shared/components/error-state/error-state';
 import { Icon } from '@shared/components/icon/icon';
 import { PageContainer } from '@shared/components/page-container/page-container';
 import { ProductCard } from '@shared/components/product-card/product-card';
+import { ProductReviews } from '@shared/components/product-reviews/product-reviews';
 import { QuantitySelector } from '@shared/components/quantity-selector/quantity-selector';
 import { Rating } from '@shared/components/rating/rating';
 import { Skeleton } from '@shared/components/skeleton/skeleton';
@@ -46,6 +47,7 @@ import { WishlistStore } from '@state/wishlist.store';
     Rating,
     QuantitySelector,
     ProductCard,
+    ProductReviews,
     Spinner,
     Skeleton,
     ErrorState,

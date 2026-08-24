@@ -1,0 +1,338 @@
+<section class="reviews-section" aria-label="Customer Reviews">
+  <div class="reviews-section__header">
+    <div class="reviews-section__title-group">
+      <h2 class="reviews-section__title">Customer Reviews & Ratings</h2>
+      <span class="reviews-section__subtitle">
+        Real feedback from verified purchasers of {{ productName() }}
+      </span>
+    </div>
+
+    <div class="reviews-section__header-action">
+      <button
+        type="button"
+        appButton
+        variant="primary"
+        size="md"
+        (click)="openAddForm()"
+      >
+        <app-icon name="star" [size]="18" />
+        Write a Review
+      </button>
+    </div>
+  </div>
+
+  <!-- RATING SUMMARY & DISTRIBUTION PANEL -->
+  <div class="rating-summary-panel">
+    <!-- Big Average Score -->
+    <div class="summary-score-block">
+      <div class="summary-score-block__value">{{ summary().average }}</div>
+      <div class="summary-score-block__stars">
+        <app-rating [rating]="summary().average" [showValue]="false" />
+      </div>
+      <span class="summary-score-block__count">
+        Based on {{ summary().count }} {{ summary().count === 1 ? 'review' : 'reviews' }}
+      </span>
+    </div>
+
+    <!-- 5-Star Progress Distribution Bars -->
+    <div class="summary-bars-block">
+      @for (star of [5, 4, 3, 2, 1]; track star) {
+        <button
+          type="button"
+          class="distribution-row"
+          [class.distribution-row--active]="reviewStore.scoreFilter() === star"
+          (click)="reviewStore.setScoreFilter(star)"
+          [attr.aria-label]="'Filter by ' + star + ' star reviews'"
+        >
+          <span class="distribution-row__label">{{ star }} ★</span>
+          <div class="distribution-row__track">
+            <div
+              class="distribution-row__fill"
+              [style.width.%]="summary().percentages[star] || 0"
+            ></div>
+          </div>
+          <span class="distribution-row__count">{{ summary().countsMap[star] || 0 }}</span>
+        </button>
+      }
+    </div>
+
+    <!-- Purchase Status Badge / Callout -->
+    <div class="summary-verify-block">
+      @if (hasPurchased()) {
+        <div class="verified-purchaser-badge">
+          <app-icon name="check-circle" [size]="20" class="text-success" />
+          <div class="verified-purchaser-badge__text">
+            <strong>Verified Purchaser</strong>
+            <p>You bought this product! Share your opinion to help fellow shoppers.</p>
+          </div>
+        </div>
+      } @else {
+        <div class="verified-purchaser-badge verified-purchaser-badge--info">
+          <app-icon name="info" [size]="20" />
+          <div class="verified-purchaser-badge__text">
+            <strong>Community Reviews</strong>
+            <p>Read authentic experiences shared by verified owners of this product.</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- CONTROLS & FILTER BAR -->
+  <div class="reviews-controls-bar">
+    <div class="reviews-controls-bar__filter">
+      @if (reviewStore.scoreFilter(); as activeFilterScore) {
+        <div class="active-filter-badge">
+          <span>Filtering: {{ activeFilterScore }} Star Reviews</span>
+          <button
+            type="button"
+            class="active-filter-badge__clear"
+            (click)="reviewStore.setScoreFilter(null)"
+            aria-label="Clear star filter"
+          >
+            <app-icon name="close" [size]="14" />
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="reviews-controls-bar__sort">
+      <label for="review-sort-select" class="sort-label">Sort By:</label>
+      <select
+        id="review-sort-select"
+        class="sort-select"
+        [value]="reviewStore.activeSort()"
+        (change)="onSortChange($event)"
+      >
+        <option value="newest">Most Recent</option>
+        <option value="highest">Highest Rating</option>
+        <option value="lowest">Lowest Rating</option>
+        <option value="helpful">Most Helpful</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- REVIEW CARDS LIST -->
+  @if (paginatedData().items.length === 0) {
+    <div class="reviews-empty">
+      <app-empty-state
+        [heading]="'No reviews match your criteria'"
+        [description]="'Be the first customer to share feedback for ' + productName() + '!'"
+      />
+      <div class="reviews-empty__action">
+        <button type="button" appButton variant="primary" size="md" (click)="openAddForm()">
+          Write First Review
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="reviews-list" role="list">
+      @for (rev of paginatedData().items; track rev.id) {
+        <article class="review-card" role="listitem">
+          <header class="review-card__header">
+            <div class="review-card__author-group">
+              <div class="review-card__avatar">
+                {{ getAuthorInitials(rev.authorName) }}
+              </div>
+              <div class="review-card__author-info">
+                <div class="review-card__author-name-row">
+                  <strong class="review-card__author-name">{{ rev.authorName }}</strong>
+                  @if (rev.verifiedPurchase) {
+                    <app-badge variant="success" size="sm">Verified Purchase</app-badge>
+                  }
+                </div>
+                <span class="review-card__date">
+                  Reviewed on {{ rev.createdAt | date: 'mediumDate' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="review-card__score">
+              <app-rating [rating]="rev.score" [showValue]="true" />
+            </div>
+          </header>
+
+          <div class="review-card__body">
+            <h3 class="review-card__title">{{ rev.title }}</h3>
+            <p class="review-card__text">{{ rev.body }}</p>
+          </div>
+
+          <footer class="review-card__footer">
+            <div class="review-card__helpful">
+              <button
+                type="button"
+                class="helpful-btn"
+                [class.helpful-btn--voted]="reviewStore.isHelpfulVoted(rev.id)"
+                (click)="reviewStore.toggleHelpful(rev.id)"
+              >
+                <app-icon name="check" [size]="14" />
+                <span>Helpful ({{ rev.helpfulCount }})</span>
+              </button>
+            </div>
+
+            @if (reviewStore.isOwnReview(rev)) {
+              <div class="review-card__owner-actions">
+                <button
+                  type="button"
+                  class="owner-action-btn"
+                  (click)="openEditForm(rev)"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="owner-action-btn owner-action-btn--danger"
+                  (click)="deleteReview(rev.id)"
+                >
+                  Delete
+                </button>
+              </div>
+            }
+          </footer>
+        </article>
+      }
+    </div>
+
+    <!-- PAGINATION BAR -->
+    @if (paginatedData().totalPages > 1) {
+      <nav class="reviews-pagination" aria-label="Reviews Pagination">
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="paginatedData().currentPage === 1"
+          (click)="reviewStore.setPage(paginatedData().currentPage - 1)"
+        >
+          <app-icon name="chevron-left" [size]="16" />
+          Previous
+        </button>
+
+        <div class="pagination-pages">
+          @for (p of [].constructor(paginatedData().totalPages); track $index; let pageNum = $index) {
+            <button
+              type="button"
+              class="pagination-num"
+              [class.pagination-num--active]="paginatedData().currentPage === (pageNum + 1)"
+              (click)="reviewStore.setPage(pageNum + 1)"
+            >
+              {{ pageNum + 1 }}
+            </button>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="paginatedData().currentPage === paginatedData().totalPages"
+          (click)="reviewStore.setPage(paginatedData().currentPage + 1)"
+        >
+          Next
+          <app-icon name="chevron-right" [size]="16" />
+        </button>
+      </nav>
+    }
+  }
+
+  <!-- ADD / EDIT REVIEW MODAL FORM OVERLAY -->
+  @if (isFormOpen()) {
+    <div class="review-modal-backdrop" (click)="closeForm()">
+      <div
+        class="review-modal-card"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-modal-title"
+      >
+        <header class="review-modal-card__header">
+          <h2 id="review-modal-title" class="review-modal-card__title">
+            {{ editingReviewId() ? 'Edit Your Review' : 'Write a Product Review' }}
+          </h2>
+          <button
+            type="button"
+            class="review-modal-card__close"
+            (click)="closeForm()"
+            aria-label="Close modal"
+          >
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="review-form">
+          <!-- Interactive Star Selector -->
+          <div class="form-group">
+            <label class="form-label">Overall Rating *</label>
+            <div class="star-selector">
+              @for (star of [1, 2, 3, 4, 5]; track star) {
+                <button
+                  type="button"
+                  class="star-btn"
+                  [class.star-btn--selected]="reviewForm.value.score >= star"
+                  (click)="setFormScore(star)"
+                  [attr.aria-label]="'Rate ' + star + ' stars'"
+                >
+                  ★
+                </button>
+              }
+              <span class="star-selector__label">{{ getScoreLabel(reviewForm.value.score) }}</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="rev-author" class="form-label">Your Name *</label>
+            <input
+              id="rev-author"
+              type="text"
+              formControlName="authorName"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('authorName')"
+              placeholder="Your full name"
+            />
+            @if (isControlInvalid('authorName')) {
+              <span class="form-error">Author name is required (min 2 chars).</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="rev-title" class="form-label">Review Headline / Summary *</label>
+            <input
+              id="rev-title"
+              type="text"
+              formControlName="title"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('title')"
+              placeholder="e.g. Outstanding build quality and comfort!"
+            />
+            @if (isControlInvalid('title')) {
+              <span class="form-error">Headline is required (min 3 chars).</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="rev-body" class="form-label">Detailed Review *</label>
+            <textarea
+              id="rev-body"
+              rows="4"
+              formControlName="body"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('body')"
+              placeholder="Describe your experience with this product, its pros, cons, and performance..."
+            ></textarea>
+            @if (isControlInvalid('body')) {
+              <span class="form-error">Please write at least 10 characters in your review body.</span>
+            }
+          </div>
+
+          <div class="review-modal-card__footer">
+            <button type="button" appButton variant="secondary" size="md" (click)="closeForm()">
+              Cancel
+            </button>
+
+            <button type="submit" appButton variant="primary" size="md">
+              {{ editingReviewId() ? 'Save Changes' : 'Submit Review' }}
+              <app-icon name="check" [size]="16" />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</section>
