@@ -1,0 +1,96 @@
+<section class="profile-section">
+  <div class="profile-section__header">
+    <div class="profile-section__title-row">
+      <div>
+        <h2 class="profile-section__title">Saved Addresses</h2>
+        <p class="profile-section__subtitle">
+          Manage your delivery and billing destinations for faster checkout.
+        </p>
+      </div>
+      <button
+        type="button"
+        appButton
+        variant="primary"
+        size="md"
+        (click)="addressStore.openAddForm()"
+      >
+        <app-icon name="close" [size]="16" style="transform: rotate(45deg)" />
+        Add New Address
+      </button>
+    </div>
+  </div>
+
+  <div class="address-grid">
+    @for (addr of addressStore.savedAddresses(); track addr.id) {
+      <article class="address-card">
+        <div class="address-card__header">
+          <span class="address-card__label">{{ addr.label }}</span>
+          @if (addr.isDefault) {
+            <app-badge variant="brand" size="sm">Default Address</app-badge>
+          }
+        </div>
+
+        <div class="address-card__body">
+          <strong class="address-card__recipient">{{ addr.recipient }}</strong>
+          <span>{{ addr.line1 }}</span>
+          @if (addr.line2) {
+            <span>{{ addr.line2 }}</span>
+          }
+          <span>{{ addr.city }}, {{ addr.region }} — {{ addr.postcode }}</span>
+          @if (addr.phone) {
+            <span class="address-card__phone">Phone: {{ addr.phone }}</span>
+          }
+        </div>
+
+        <div class="address-card__actions">
+          <button
+            type="button"
+            class="address-card__btn"
+            (click)="addressStore.openEditForm(addr.id)"
+          >
+            Edit
+          </button>
+
+          @if (!addr.isDefault) {
+            <button
+              type="button"
+              class="address-card__btn"
+              (click)="setDefaultAddress(addr.id, addr.label)"
+            >
+              Set as Default
+            </button>
+
+            <button
+              type="button"
+              class="address-card__btn address-card__btn--danger"
+              (click)="deleteAddress(addr.id, addr.label)"
+            >
+              Delete
+            </button>
+          }
+        </div>
+      </article>
+    }
+
+    <button
+      type="button"
+      class="address-card address-card--add-new"
+      (click)="addressStore.openAddForm()"
+    >
+      <div class="address-card__add-content">
+        <app-icon name="close" [size]="28" style="transform: rotate(45deg)" />
+        <span class="address-card__add-text">Add New Delivery Address</span>
+      </div>
+    </button>
+  </div>
+</section>
+
+<!-- Modal Reactive Address Form -->
+@if (addressStore.isFormOpen()) {
+  <app-address-form
+    [mode]="addressStore.formMode()"
+    [initialAddress]="addressStore.editingAddress()"
+    (cancel)="addressStore.closeForm()"
+    (saved)="addressStore.closeForm()"
+  />
+}

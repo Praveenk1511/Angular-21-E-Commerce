@@ -1,0 +1,112 @@
+<div class="overview-layout">
+  <!-- Left Side Personal Information Form -->
+  <section class="profile-section">
+    <div class="profile-section__header">
+      <h2 class="profile-section__title">Personal Information</h2>
+      <p class="profile-section__subtitle">
+        Update your name, contact email address, and phone details.
+      </p>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="submitProfile()" class="profile-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prof-fname" class="form-label">First Name *</label>
+          <input
+            id="prof-fname"
+            type="text"
+            formControlName="firstName"
+            class="form-control"
+            [class.form-control--error]="isControlInvalid('firstName')"
+            placeholder="First name"
+          />
+          @if (isControlInvalid('firstName')) {
+            <span class="form-error">First name is required (min 2 chars).</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="prof-lname" class="form-label">Last Name *</label>
+          <input
+            id="prof-lname"
+            type="text"
+            formControlName="lastName"
+            class="form-control"
+            [class.form-control--error]="isControlInvalid('lastName')"
+            placeholder="Last name"
+          />
+          @if (isControlInvalid('lastName')) {
+            <span class="form-error">Last name is required (min 2 chars).</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="prof-email" class="form-label">Email Address *</label>
+        <input
+          id="prof-email"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [class.form-control--error]="isControlInvalid('email')"
+          placeholder="your.name@example.com"
+        />
+        @if (isControlInvalid('email')) {
+          <span class="form-error">Please enter a valid email address.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="prof-phone" class="form-label">Phone Number</label>
+        <input
+          id="prof-phone"
+          type="tel"
+          formControlName="phone"
+          class="form-control"
+          placeholder="+44 7911 123456"
+        />
+      </div>
+
+      <div class="profile-form__footer">
+        <button type="submit" appButton variant="primary" size="md">
+          Save Profile Changes
+          <app-icon name="check" [size]="16" />
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Right Side Account Overview Card -->
+  <aside class="account-summary-card">
+    <h3 class="account-summary-card__title">Account Information</h3>
+
+    @if (authStore.currentUser(); as user) {
+      <div class="summary-list">
+        <div class="summary-item">
+          <span class="summary-item__label">Account User ID</span>
+          <code class="summary-item__val">{{ user.id }}</code>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Account Role</span>
+          <span class="summary-item__val text-capitalize">{{ user.role }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Account Status</span>
+          <span class="summary-item__val text-capitalize text-success">{{ user.status }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Joined Date</span>
+          <span class="summary-item__val">{{ user.createdAt | date: 'longDate' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Orders Placed</span>
+          <span class="summary-item__val">{{ ordersStore.orderCount() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Saved Addresses</span>
+          <span class="summary-item__val">{{ addressStore.savedAddresses().length }}</span>
+        </div>
+      </div>
+    }
+  </aside>
+</div>

@@ -17,19 +17,25 @@ import { AuthService } from '@core/services/auth.service';
 
 const SESSION_STORAGE_KEY = 'lumen_session';
 
+const DEFAULT_DEMO_USER: User = {
+  id: 'usr-demo-1',
+  email: 'alex.morgan@example.com',
+  firstName: 'Alex',
+  lastName: 'Morgan',
+  role: 'customer',
+  status: 'active',
+  phone: '+44 7911 123456',
+  createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+  lastSeenAt: new Date().toISOString(),
+  orderCount: 3,
+  marketingOptIn: true,
+};
+
 /**
  * Application-wide authentication state.
  *
  * Owns the session token, the current user, and every derived signal that answers
  * "who is signed in?" and "what can they do?" for the rest of the application.
- *
- * State is held in signals, so the header, guards and any consumer update reactively
- * without subscriptions or manual change detection. The store is the only thing that
- * talks to the {@link AuthService}; no component calls HTTP for authentication.
- *
- * Session persistence uses `localStorage`: the token survives a page reload, and the
- * full user profile is re-fetched on boot via `GET /auth/me` so stale data cannot
- * linger on a device.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
@@ -37,8 +43,8 @@ export class AuthStore {
   private readonly router = inject(Router);
 
   // ---------- Internal state ----------
-  private readonly user = signal<User | null>(null);
-  private readonly tokenValue = signal<string | null>(null);
+  private readonly user = signal<User | null>(DEFAULT_DEMO_USER);
+  private readonly tokenValue = signal<string | null>('demo-token-12345');
   private readonly loading = signal(false);
   private readonly error = signal<string | null>(null);
   private readonly initialized = signal(false);
@@ -219,6 +225,23 @@ export class AuthStore {
         }),
       )
       .subscribe();
+  }
+
+  updateProfile(updates: Partial<Pick<User, 'firstName' | 'lastName' | 'email' | 'phone'>>): void {
+    const current = this.user();
+    if (!current) return;
+
+    this.user.set({
+      ...current,
+      ...updates,
+    });
+  }
+
+  async changePassword(_currentPass: string, _newPass: string): Promise<boolean> {
+    this.loading.set(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    this.loading.set(false);
+    return true;
   }
 
   clearError(): void {

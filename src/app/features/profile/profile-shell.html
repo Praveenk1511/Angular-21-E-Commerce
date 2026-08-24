@@ -1,0 +1,74 @@
+<app-page-container>
+  <div class="profile-shell">
+    @if (authStore.currentUser(); as user) {
+      <!-- User Profile Avatar Banner -->
+      <header class="profile-card">
+        <div class="profile-card__avatar">
+          <span>{{ userInitials }}</span>
+        </div>
+
+        <div class="profile-card__info">
+          <div class="profile-card__name-row">
+            <h1 class="profile-card__name">{{ user.firstName }} {{ user.lastName }}</h1>
+            <app-badge variant="brand" size="sm">
+              {{ user.role === 'customer' ? 'Verified Member' : user.role }}
+            </app-badge>
+          </div>
+
+          <div class="profile-card__sub-row">
+            <span class="profile-card__email">{{ user.email }}</span>
+            <span class="profile-card__dot">•</span>
+            <span class="profile-card__joined">Member since {{ user.createdAt | date: 'MMM yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="profile-card__stats">
+          <a [routerLink]="ordersUrl" class="profile-stat-chip">
+            <span class="profile-stat-chip__val">{{ ordersStore.orderCount() }}</span>
+            <span class="profile-stat-chip__label">Orders Placed</span>
+          </a>
+
+          <a [routerLink]="addressesUrl" class="profile-stat-chip">
+            <span class="profile-stat-chip__val">{{ addressStore.savedAddresses().length }}</span>
+            <span class="profile-stat-chip__label">Saved Addresses</span>
+          </a>
+        </div>
+      </header>
+    }
+
+    <!-- Navigation Tabs Bar -->
+    <nav class="profile-tabs" aria-label="Profile Navigation">
+      <a
+        [routerLink]="overviewUrl"
+        routerLinkActive="profile-tab--active"
+        class="profile-tab"
+      >
+        <app-icon name="user" [size]="18" />
+        <span>Profile Overview</span>
+      </a>
+
+      <a
+        [routerLink]="addressesUrl"
+        routerLinkActive="profile-tab--active"
+        class="profile-tab"
+      >
+        <app-icon name="inbox" [size]="18" />
+        <span>Saved Addresses</span>
+      </a>
+
+      <a
+        [routerLink]="securityUrl"
+        routerLinkActive="profile-tab--active"
+        class="profile-tab"
+      >
+        <app-icon name="check-circle" [size]="18" />
+        <span>Security & Password</span>
+      </a>
+    </nav>
+
+    <!-- Child View Outlet -->
+    <main class="profile-content">
+      <router-outlet />
+    </main>
+  </div>
+</app-page-container>

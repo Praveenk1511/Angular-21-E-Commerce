@@ -109,11 +109,7 @@ export const routes: Routes = [
       },
       {
         path: SEGMENTS.profile,
-        title: 'Your profile',
-        canActivate: [authGuard],
-        data: { breadcrumb: 'Profile', requiresAuth: true } satisfies AppRouteData,
-        loadComponent: () =>
-          import('@features/profile/pages/profile-page/profile-page').then((m) => m.ProfilePage),
+        loadChildren: () => import('@features/profile/profile.routes').then((m) => m.PROFILE_ROUTES),
       },
 
       /* Static content pages linked from the footer. */

@@ -1,0 +1,97 @@
+<div class="security-layout">
+  <!-- Change Password Section -->
+  <section class="profile-section">
+    <div class="profile-section__header">
+      <h2 class="profile-section__title">Change Password</h2>
+      <p class="profile-section__subtitle">
+        Ensure your account remains secure by choosing a strong password with letters and numbers.
+      </p>
+    </div>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" class="password-form">
+      <div class="form-group">
+        <label for="sec-curpass" class="form-label">Current Password *</label>
+        <input
+          id="sec-curpass"
+          type="password"
+          formControlName="currentPassword"
+          class="form-control"
+          [class.form-control--error]="isControlInvalid('currentPassword')"
+          placeholder="Enter current password"
+        />
+        @if (isControlInvalid('currentPassword')) {
+          <span class="form-error">Current password is required (min 6 chars).</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="sec-newpass" class="form-label">New Password *</label>
+        <input
+          id="sec-newpass"
+          type="password"
+          formControlName="newPassword"
+          class="form-control"
+          [class.form-control--error]="isControlInvalid('newPassword')"
+          placeholder="Enter new strong password"
+        />
+        @if (isControlInvalid('newPassword')) {
+          <span class="form-error">
+            New password must be at least 8 characters long and contain uppercase, lowercase, and numbers.
+          </span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="sec-confpass" class="form-label">Confirm New Password *</label>
+        <input
+          id="sec-confpass"
+          type="password"
+          formControlName="confirmPassword"
+          class="form-control"
+          [class.form-control--error]="isControlInvalid('confirmPassword') || isPasswordMismatch"
+          placeholder="Confirm new password"
+        />
+        @if (passwordForm.hasError('passwordMismatch') && (passwordForm.get('confirmPassword')?.touched || submitted)) {
+          <span class="form-error">Passwords do not match. Please check again.</span>
+        }
+      </div>
+
+      <div class="password-form__footer">
+        <button
+          type="submit"
+          appButton
+          variant="primary"
+          size="md"
+          [disabled]="authStore.isLoading()"
+        >
+          <span>Update Password</span>
+          <app-icon name="check-circle" [size]="16" />
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Right Side Security Guidance Box -->
+  <aside class="security-info-card">
+    <h3 class="security-info-card__title">Security Best Practices</h3>
+    <ul class="security-tips-list">
+      <li>
+        <app-icon name="check-circle" [size]="16" class="text-success" />
+        <span>Use a unique password not shared across other sites.</span>
+      </li>
+      <li>
+        <app-icon name="check-circle" [size]="16" class="text-success" />
+        <span>Combine uppercase, lowercase, numbers, and symbols.</span>
+      </li>
+      <li>
+        <app-icon name="check-circle" [size]="16" class="text-success" />
+        <span>Avoid using predictable information like names or dates.</span>
+      </li>
+    </ul>
+
+    <div class="security-info-card__footer">
+      <app-icon name="info" [size]="16" />
+      <span>Last password update: 30 days ago</span>
+    </div>
+  </aside>
+</div>
