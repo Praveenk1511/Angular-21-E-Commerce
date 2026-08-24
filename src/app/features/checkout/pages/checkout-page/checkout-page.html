@@ -40,9 +40,14 @@
           </div>
 
           <div class="success-card__actions">
-            <a [routerLink]="productsUrl" appButton variant="primary" size="lg">
+            @if (result.orderReference) {
+              <a [routerLink]="getOrderDetailUrl(result.orderReference)" appButton variant="primary" size="lg">
+                View Order Details
+                <app-icon name="chevron-right" [size]="18" />
+              </a>
+            }
+            <a [routerLink]="productsUrl" appButton variant="secondary" size="lg">
               Continue Shopping
-              <app-icon name="chevron-right" [size]="18" />
             </a>
           </div>
         </div>

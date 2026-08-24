@@ -1,0 +1,236 @@
+<app-page-container>
+  <div class="order-detail-page">
+    <header class="order-detail-page__header">
+      <a [routerLink]="ordersUrl" class="order-detail-page__back-link">
+        <app-icon name="chevron-left" [size]="16" />
+        Back to Orders
+      </a>
+
+      @if (order(); as ord) {
+        <div class="order-detail-page__header-main">
+          <div class="order-detail-page__title-group">
+            <h1 class="order-detail-page__title">Order {{ ord.reference }}</h1>
+            <app-badge [variant]="getStatusVariant(ord.status)" size="md">
+              {{ getStatusLabel(ord.status) }}
+            </app-badge>
+          </div>
+
+          <div class="order-detail-page__meta">
+            <span>Placed on {{ ord.placedAt | date: 'medium' }}</span>
+          </div>
+        </div>
+      }
+    </header>
+
+    @if (order(); as ord) {
+      <!-- VISUAL TRACKING TIMELINE STEPPER -->
+      @if (trackingSteps().length > 0) {
+        <section class="tracking-card">
+          <h2 class="tracking-card__title">Order Progress</h2>
+
+          <ol class="tracking-stepper">
+            @for (step of trackingSteps(); track step.status) {
+              <li
+                class="tracking-stepper__item"
+                [class.tracking-stepper__item--completed]="step.isCompleted"
+                [class.tracking-stepper__item--active]="step.isActive"
+              >
+                <div class="tracking-stepper__circle">
+                  @if (step.isCompleted) {
+                    <app-icon name="check-circle" [size]="16" />
+                  }
+                </div>
+                <span class="tracking-stepper__label">{{ step.label }}</span>
+              </li>
+            }
+          </ol>
+        </section>
+      }
+
+      <div class="order-detail-page__layout">
+        <!-- Main Items & History -->
+        <main class="order-detail-main">
+          <!-- Purchased Items Section -->
+          <section class="order-section">
+            <h2 class="order-section__title">Purchased Items ({{ ord.lines.length }})</h2>
+
+            <div class="items-table-wrapper">
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th class="text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (line of ord.lines; track line.id) {
+                    <tr>
+                      <td class="product-cell">
+                        <div class="product-cell__info">
+                          <strong class="product-cell__name">{{ line.productName }}</strong>
+                          <span class="product-cell__sku">SKU: {{ line.sku }}</span>
+                        </div>
+                      </td>
+                      <td>{{ line.unitPrice.amountMinor | price: line.unitPrice.currency }}</td>
+                      <td>{{ line.quantity }}</td>
+                      <td class="text-right font-bold">
+                        {{ line.lineTotalMinor | price: line.unitPrice.currency }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Audit Timeline Event History -->
+          <section class="order-section">
+            <h2 class="order-section__title">Order History Log</h2>
+
+            <div class="timeline-log">
+              @for (evt of ord.timeline; track evt.at) {
+                <div class="timeline-event">
+                  <div class="timeline-event__header">
+                    <app-badge [variant]="getStatusVariant(evt.status)" size="sm">
+                      {{ getStatusLabel(evt.status) }}
+                    </app-badge>
+                    <span class="timeline-event__time">{{ evt.at | date: 'medium' }}</span>
+                  </div>
+                  @if (evt.note) {
+                    <p class="timeline-event__note">{{ evt.note }}</p>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        </main>
+
+        <!-- Right Side Cards -->
+        <aside class="order-detail-side">
+          <!-- Customer Action Buttons -->
+          @if (ordersStore.canCancel(ord.status) || ordersStore.canReturn(ord.status)) {
+            <div class="action-card">
+              <h3 class="action-card__title">Order Actions</h3>
+
+              @if (ordersStore.canCancel(ord.status)) {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  size="md"
+                  [fullWidth]="true"
+                  (click)="cancelOrder(ord.id, ord.reference)"
+                >
+                  Cancel This Order
+                </button>
+              }
+
+              @if (ordersStore.canReturn(ord.status)) {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  size="md"
+                  [fullWidth]="true"
+                  (click)="returnOrder(ord.id, ord.reference)"
+                >
+                  Request Return / Refund
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Delivery Address Card -->
+          <div class="info-card">
+            <h3 class="info-card__title">Shipping Address</h3>
+            <div class="info-card__body">
+              <strong>{{ ord.shippingAddress.recipient }}</strong>
+              <span>{{ ord.shippingAddress.line1 }}</span>
+              @if (ord.shippingAddress.line2) {
+                <span>{{ ord.shippingAddress.line2 }}</span>
+              }
+              <span>{{ ord.shippingAddress.city }}, {{ ord.shippingAddress.region }} — {{ ord.shippingAddress.postcode }}</span>
+              @if (ord.shippingAddress.phone) {
+                <span>Phone: {{ ord.shippingAddress.phone }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Delivery Details Card -->
+          <div class="info-card">
+            <h3 class="info-card__title">Delivery Info</h3>
+            <div class="info-card__body">
+              <span>Carrier: <strong>{{ ord.shipping.carrier }}</strong></span>
+              @if (ord.shipping.trackingNumber) {
+                <span>Tracking Ref: <strong>{{ ord.shipping.trackingNumber }}</strong></span>
+              }
+              @if (ord.shipping.estimatedDeliveryAt) {
+                <span>Est. Delivery: <strong>{{ ord.shipping.estimatedDeliveryAt | date: 'mediumDate' }}</strong></span>
+              }
+            </div>
+          </div>
+
+          <!-- Payment Card -->
+          <div class="info-card">
+            <h3 class="info-card__title">Payment Method</h3>
+            <div class="info-card__body">
+              <span>Method: <strong class="text-capitalize">{{ ord.payment.brand }}</strong></span>
+              <span>Status: <strong class="text-success text-capitalize">{{ ord.payment.status }}</strong></span>
+              @if (ord.payment.maskedIdentifier) {
+                <span>Ref / Transaction: <code>{{ ord.payment.maskedIdentifier }}</code></span>
+              }
+            </div>
+          </div>
+
+          <!-- Financial Breakdown Card -->
+          <div class="info-card info-card--highlight">
+            <h3 class="info-card__title">Payment Summary</h3>
+            <div class="summary-rows">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span>{{ ord.totals.subtotalMinor | price: ord.totals.currency }}</span>
+              </div>
+              @if (ord.totals.discountMinor > 0) {
+                <div class="summary-row text-success">
+                  <span>Discount</span>
+                  <span>-{{ ord.totals.discountMinor | price: ord.totals.currency }}</span>
+                </div>
+              }
+              <div class="summary-row">
+                <span>Shipping</span>
+                <span>
+                  @if (ord.totals.shippingMinor === 0) {
+                    <strong class="text-success">FREE</strong>
+                  } @else {
+                    {{ ord.totals.shippingMinor | price: ord.totals.currency }}
+                  }
+                </span>
+              </div>
+              <div class="summary-row">
+                <span>Estimated Tax</span>
+                <span>{{ ord.totals.taxMinor | price: ord.totals.currency }}</span>
+              </div>
+              <div class="summary-divider"></div>
+              <div class="summary-row summary-row--total">
+                <span>Grand Total</span>
+                <span>{{ ord.totals.grandTotalMinor | price: ord.totals.currency }}</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    } @else {
+      <div class="order-detail-page__not-found">
+        <app-empty-state
+          [heading]="'Order Not Found'"
+          [description]="'We could not find an order with the ID ' + id() + '.'"
+        />
+        <a [routerLink]="ordersUrl" appButton variant="primary" size="lg">
+          Return to Orders
+        </a>
+      </div>
+    }
+  </div>
+</app-page-container>

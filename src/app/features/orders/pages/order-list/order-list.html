@@ -1,0 +1,136 @@
+<app-page-container>
+  <div class="order-list-page">
+    <header class="order-list-page__header">
+      <div class="order-list-page__title-group">
+        <h1 class="order-list-page__title">Your Orders</h1>
+        @if (ordersStore.orderCount() > 0) {
+          <app-badge variant="brand" size="md">
+            {{ ordersStore.orderCount() }} {{ ordersStore.orderCount() === 1 ? 'order' : 'orders' }}
+          </app-badge>
+        }
+      </div>
+    </header>
+
+    @if (ordersStore.isEmpty()) {
+      <div class="order-list-page__empty">
+        <app-empty-state
+          [heading]="'You haven\'t placed any orders yet'"
+          [description]="'Once you place an order, you will be able to track its progress, view items, and manage fulfillment here.'"
+        />
+        <div class="order-list-page__empty-action">
+          <a [routerLink]="productsUrl" appButton variant="primary" size="lg">
+            Start Shopping
+            <app-icon name="chevron-right" [size]="18" />
+          </a>
+        </div>
+      </div>
+    } @else {
+      <!-- Filter Tabs -->
+      <nav class="order-tabs" aria-label="Order Filter Tabs">
+        <button
+          type="button"
+          class="order-tab"
+          [class.order-tab--active]="activeTab() === 'all'"
+          (click)="setTab('all')"
+        >
+          All Orders ({{ ordersStore.orderCount() }})
+        </button>
+        <button
+          type="button"
+          class="order-tab"
+          [class.order-tab--active]="activeTab() === 'active'"
+          (click)="setTab('active')"
+        >
+          Active & In-Transit
+        </button>
+        <button
+          type="button"
+          class="order-tab"
+          [class.order-tab--active]="activeTab() === 'delivered'"
+          (click)="setTab('delivered')"
+        >
+          Delivered
+        </button>
+        <button
+          type="button"
+          class="order-tab"
+          [class.order-tab--active]="activeTab() === 'cancelled'"
+          (click)="setTab('cancelled')"
+        >
+          Cancelled / Returned
+        </button>
+      </nav>
+
+      @if (filteredOrders().length === 0) {
+        <div class="order-list-page__no-match">
+          <p>No orders match the selected status filter.</p>
+          <button type="button" appButton variant="secondary" size="sm" (click)="setTab('all')">
+            Show All Orders
+          </button>
+        </div>
+      } @else {
+        <div class="orders-grid" role="list">
+          @for (order of filteredOrders(); track order.id) {
+            <article class="order-card" role="listitem">
+              <header class="order-card__header">
+                <div class="order-card__info">
+                  <span class="order-card__ref">{{ order.reference }}</span>
+                  <span class="order-card__date">Placed on {{ order.placedAt | date: 'mediumDate' }}</span>
+                </div>
+
+                <div class="order-card__status">
+                  <app-badge [variant]="getStatusVariant(order.status)" size="md">
+                    {{ getStatusLabel(order.status) }}
+                  </app-badge>
+                </div>
+              </header>
+
+              <!-- Line Items Preview Row -->
+              <div class="order-card__items-preview">
+                <div class="order-card__items-list">
+                  @for (line of order.lines; track line.id) {
+                    <div class="order-item-chip">
+                      <span class="order-item-chip__qty">{{ line.quantity }}x</span>
+                      <span class="order-item-chip__name">{{ line.productName }}</span>
+                    </div>
+                  }
+                </div>
+
+                <div class="order-card__total-block">
+                  <span class="order-card__total-label">Total Amount</span>
+                  <span class="order-card__total-amount">
+                    {{ order.totals.grandTotalMinor | price: order.totals.currency }}
+                  </span>
+                </div>
+              </div>
+
+              <footer class="order-card__footer">
+                <div class="order-card__address">
+                  <app-icon name="user" [size]="16" />
+                  <span>Delivering to <strong>{{ order.shippingAddress.recipient }}</strong></span>
+                </div>
+
+                <div class="order-card__actions">
+                  @if (ordersStore.canCancel(order.status)) {
+                    <button
+                      type="button"
+                      class="order-card__cancel-btn"
+                      (click)="cancelOrder($event, order.id, order.reference)"
+                    >
+                      Cancel Order
+                    </button>
+                  }
+
+                  <a [routerLink]="getOrderDetailUrl(order.id)" appButton variant="secondary" size="sm">
+                    View Details
+                    <app-icon name="chevron-right" [size]="16" />
+                  </a>
+                </div>
+              </footer>
+            </article>
+          }
+        </div>
+      }
+    }
+  </div>
+</app-page-container>

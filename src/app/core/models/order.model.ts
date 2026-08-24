@@ -9,9 +9,11 @@ import type { CurrencyCode, Price } from './product.model';
  */
 export type OrderStatus =
   | 'pending'
+  | 'confirmed'
   | 'processing'
   | 'on-hold'
   | 'shipped'
+  | 'out-for-delivery'
   | 'delivered'
   | 'cancelled'
   | 'refunded'
