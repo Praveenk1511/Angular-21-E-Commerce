@@ -1,21 +1,36 @@
 <article class="product-card" [class.product-card--unavailable]="isUnavailable()">
   <div class="product-card__media">
-    <!-- Placeholder image: real assets do not exist in the mock, so a coloured
-         rectangle with the first letter of the product name stands in. -->
-    <span class="product-card__thumb" aria-hidden="true">
-      {{ product().name[0] }}
-    </span>
+    @if (product().thumbnail.url && !imageFailed()) {
+      <img
+        class="product-card__image"
+        [src]="product().thumbnail.url"
+        [alt]="product().thumbnail.alt || product().name"
+        loading="lazy"
+        (error)="handleImageError()"
+      />
+    } @else {
+      <span class="product-card__thumb" aria-hidden="true">
+        {{ product().name[0] }}
+      </span>
+    }
 
-    @if (badges().length > 0) {
+    @if (badges().length > 0 || discountPercent()) {
       <div class="product-card__badges">
         @for (badge of badges(); track badge.label) {
           <app-badge [variant]="badge.variant" [size]="'sm'">{{ badge.label }}</app-badge>
+        }
+        @if (discountPercent(); as pct) {
+          <app-badge [variant]="'danger'" [size]="'sm'">-{{ pct }}%</app-badge>
         }
       </div>
     }
   </div>
 
   <div class="product-card__body">
+    @if (brandName(); as brand) {
+      <span class="product-card__brand">{{ brand }}</span>
+    }
+
     <h3 class="product-card__name">
       <a class="product-card__link" [routerLink]="url()">{{ product().name }}</a>
     </h3>

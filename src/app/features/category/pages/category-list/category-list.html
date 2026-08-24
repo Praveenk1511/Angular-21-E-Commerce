@@ -1,0 +1,73 @@
+<app-page-container>
+  <div class="category-list">
+    <header class="category-list__header">
+      <h1 class="category-list__title">Browse Categories</h1>
+      <p class="category-list__subtitle">
+        Explore our wide range of products by category and subcategory.
+      </p>
+    </header>
+
+    @if (store.error(); as errorMessage) {
+      <div class="category-list__error">
+        <app-error-state [message]="errorMessage" (retry)="store.loadCategoriesOverview()" />
+      </div>
+    } @else if (store.loading()) {
+      <div class="category-list__loading" aria-busy="true">
+        <app-spinner [size]="28" [label]="'Loading categories'" />
+        <div class="category-list__grid">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="category-list__skeleton-card">
+              <app-skeleton [lines]="1" [width]="'50%'" />
+              <app-skeleton [lines]="2" />
+              <app-skeleton [variant]="'rect'" [height]="'3rem'" />
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="category-list__grid">
+        @for (category of store.categoryTree(); track category.id) {
+          <article class="category-card">
+            <div class="category-card__header">
+              <h2 class="category-card__title">
+                <a [routerLink]="getCategoryUrl(category.slug)">{{ category.name }}</a>
+              </h2>
+              <app-badge [variant]="'brand'" [size]="'sm'">
+                {{ category.totalProductCount }} products
+              </app-badge>
+            </div>
+
+            <p class="category-card__description">{{ category.description }}</p>
+
+            @if (category.children && category.children.length > 0) {
+              <div class="category-card__subcategories">
+                <span class="category-card__sub-label">Subcategories:</span>
+                <ul class="category-card__sub-list">
+                  @for (sub of category.children; track sub.id) {
+                    <li>
+                      <a [routerLink]="getCategoryUrl(sub.slug)" class="category-card__sub-link">
+                        {{ sub.name }} ({{ sub.totalProductCount }})
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            <div class="category-card__footer">
+              <a
+                [routerLink]="getCategoryUrl(category.slug)"
+                appButton
+                variant="secondary"
+                size="sm"
+              >
+                Browse {{ category.name }}
+                <app-icon [name]="'chevron-right'" [size]="16" />
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</app-page-container>

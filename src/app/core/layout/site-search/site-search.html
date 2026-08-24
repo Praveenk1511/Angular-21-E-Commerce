@@ -1,23 +1,156 @@
-<form class="site-search" role="search" (submit)="onSubmit($event)">
-  <label class="visually-hidden" [attr.for]="inputId">{{ label() }}</label>
+<div class="site-search-container">
+  <form class="site-search" role="search" (submit)="onSubmit($event)">
+    <label class="visually-hidden" [attr.for]="inputId">{{ label() }}</label>
 
-  <input
-    class="site-search__input"
-    [id]="inputId"
-    type="search"
-    name="q"
-    autocomplete="off"
-    [placeholder]="label()"
-    [disabled]="!enabled()"
-    [attr.aria-describedby]="enabled() ? null : hintId"
-  />
+    <input
+      #searchInput
+      class="site-search__input"
+      [id]="inputId"
+      type="search"
+      name="q"
+      autocomplete="off"
+      [placeholder]="label()"
+      [disabled]="!enabled()"
+      [value]="store.query()"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+    />
 
-  <button class="site-search__submit" type="submit" [disabled]="!enabled()">
-    <app-icon name="search" [size]="18" />
-    <span class="visually-hidden">Search</span>
-  </button>
+    <button class="site-search__submit" type="submit" [disabled]="!enabled()">
+      @if (store.loading()) {
+        <app-spinner [size]="18" [label]="'Searching'" />
+      } @else {
+        <app-icon name="search" [size]="18" />
+      }
+      <span class="visually-hidden">Search</span>
+    </button>
+  </form>
 
-  @if (!enabled()) {
-    <p class="visually-hidden" [id]="hintId">Product search is not available yet.</p>
+  <!-- Dropdown Autocomplete Panel -->
+  @if (store.isOpen()) {
+    <div
+      class="site-search__backdrop"
+      (click)="closeDropdown()"
+      (keydown.escape)="closeDropdown()"
+      tabindex="-1"
+      aria-hidden="true"
+    ></div>
+    <div class="site-search__dropdown" role="dialog" aria-label="Search suggestions">
+      @if (!store.query().trim()) {
+        <!-- Recent Searches Section -->
+        @if (store.recentSearches().length > 0) {
+          <div class="site-search__section">
+            <div class="site-search__section-header">
+              <span class="site-search__section-title">Recent Searches</span>
+              <button
+                type="button"
+                class="site-search__clear-btn"
+                (click)="store.clearRecentSearches()"
+              >
+                Clear all
+              </button>
+            </div>
+            <div class="site-search__chips">
+              @for (term of store.recentSearches(); track term) {
+                <button
+                  type="button"
+                  class="site-search__chip site-search__chip--button"
+                  (click)="selectSuggestion(term)"
+                >
+                  <app-icon name="info" [size]="14" />
+                  {{ term }}
+                  <span
+                    class="site-search__chip-remove"
+                    (click)="removeRecent($event, term)"
+                    (keydown.enter)="removeRecent($event, term)"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Remove search term"
+                  >
+                    <app-icon name="close" [size]="12" />
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Popular Suggestions Section -->
+        <div class="site-search__section">
+          <div class="site-search__section-header">
+            <span class="site-search__section-title">Popular Suggestions</span>
+          </div>
+          <div class="site-search__chips">
+            @for (term of store.suggestions(); track term) {
+              <button
+                type="button"
+                class="site-search__chip site-search__chip--button"
+                (click)="selectSuggestion(term)"
+              >
+                <app-icon name="search" [size]="14" />
+                {{ term }}
+              </button>
+            }
+          </div>
+        </div>
+      } @else {
+        <!-- Query Autocomplete Results -->
+        @if (store.loading()) {
+          <div class="site-search__status-message">
+            <app-spinner [size]="20" [label]="'Searching products'" />
+            <span>Searching for "{{ store.query() }}"...</span>
+          </div>
+        } @else if (store.autocompleteResults().length === 0) {
+          <div class="site-search__no-results">
+            <app-icon name="search" [size]="32" />
+            <p class="site-search__no-results-title">No products found</p>
+            <p class="site-search__no-results-desc">
+              We couldn't find any matches for "{{ store.query() }}". Try checking spelling or using
+              broader terms.
+            </p>
+          </div>
+        } @else {
+          <div class="site-search__section">
+            <div class="site-search__section-header">
+              <span class="site-search__section-title">Products</span>
+            </div>
+            <div class="site-search__results-list">
+              @for (product of store.autocompleteResults(); track product.id) {
+                <button
+                  type="button"
+                  class="site-search__result-item"
+                  (click)="selectProduct(product.slug)"
+                >
+                  <div class="site-search__result-thumb">
+                    @if (product.thumbnail && product.thumbnail.url) {
+                      <img [src]="product.thumbnail.url" [alt]="product.name" />
+                    } @else {
+                      <span>{{ product.name[0] }}</span>
+                    }
+                  </div>
+                  <div class="site-search__result-info">
+                    <span class="site-search__result-name">{{ product.name }}</span>
+                    <div class="site-search__result-meta">
+                      @if (store.brandsMap().get(product.brandId); as brandName) {
+                        <span class="site-search__result-brand">{{ brandName }}</span>
+                      }
+                      <span class="site-search__result-price">
+                        {{ product.price.amountMinor | price: product.price.currency }}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              }
+            </div>
+            <div class="site-search__footer">
+              <button type="button" class="site-search__view-all" (click)="onSubmit($event)">
+                See all results for "{{ store.query() }}"
+                <app-icon name="chevron-right" [size]="16" />
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
   }
-</form>
+</div>

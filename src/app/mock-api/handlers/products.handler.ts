@@ -39,6 +39,7 @@ interface ProductFilters {
   readonly maxPriceMinor?: number;
   readonly minRating?: number;
   readonly inStockOnly?: boolean;
+  readonly onSaleOnly?: boolean;
   readonly tags?: readonly string[];
 }
 
@@ -124,14 +125,16 @@ export function createProductRoutes(config: MockApiConfig): readonly MockRoute[]
  * `omit()` work correctly when building facets.
  */
 function readFilters(query: Readonly<Record<string, string>>): ProductFilters {
-  const brandIds = readList(query['brandIds']);
+  const rawBrands = query['brandIds'] || query['brand'];
+  const brandIds = readList(rawBrands);
   const tags = readList(query['tags']);
   const q = query['q'];
-  const categoryId = query['categoryId'];
-  const minPriceMinor = readInt(query['minPriceMinor']);
-  const maxPriceMinor = readInt(query['maxPriceMinor']);
-  const minRating = readInt(query['minRating']);
-  const inStockOnly = readBool(query['inStockOnly']);
+  const categoryId = query['categoryId'] || query['category'];
+  const minPriceMinor = readInt(query['minPriceMinor'] || query['minPrice']);
+  const maxPriceMinor = readInt(query['maxPriceMinor'] || query['maxPrice']);
+  const minRating = readInt(query['minRating'] || query['rating']);
+  const inStockOnly = readBool(query['inStockOnly']) ?? readBool(query['inStock']);
+  const onSaleOnly = readBool(query['onSaleOnly']) ?? readBool(query['onSale']);
 
   return {
     ...(q ? { q } : {}),
@@ -141,6 +144,7 @@ function readFilters(query: Readonly<Record<string, string>>): ProductFilters {
     ...(maxPriceMinor === undefined ? {} : { maxPriceMinor }),
     ...(minRating === undefined ? {} : { minRating }),
     ...(inStockOnly === undefined ? {} : { inStockOnly }),
+    ...(onSaleOnly === undefined ? {} : { onSaleOnly }),
     ...(tags.length > 0 ? { tags } : {}),
   };
 }
@@ -190,6 +194,13 @@ function applyFilters(
     }
 
     if (filters.inStockOnly === true && !PURCHASABLE.includes(stockFor(seed).status)) {
+      return false;
+    }
+
+    if (
+      filters.onSaleOnly === true &&
+      (seed.compareAtMinor === undefined || seed.compareAtMinor <= seed.priceMinor)
+    ) {
       return false;
     }
 

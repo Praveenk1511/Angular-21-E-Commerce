@@ -9,6 +9,7 @@ import { SiteLogo } from '@core/layout/site-logo/site-logo';
 import { SiteSearch } from '@core/layout/site-search/site-search';
 import { Icon } from '@shared/components/icon/icon';
 import { AuthStore } from '@state/auth.store';
+import { CartStore } from '@state/cart.store';
 
 /**
  * Storefront masthead.
@@ -16,10 +17,6 @@ import { AuthStore } from '@state/auth.store';
  * Composes the logo, search field, utility actions and primary navigation. Its
  * only behaviour is the mobile disclosure menu; everything else is composition,
  * and every label and destination comes from navigation configuration.
- *
- * The header account action reacts to auth state: signed-out users see "Sign in",
- * signed-in users see their display name as a link to their profile, plus a logout
- * action.
  */
 @Component({
   selector: 'app-site-header',
@@ -33,6 +30,8 @@ import { AuthStore } from '@state/auth.store';
 })
 export class SiteHeader {
   protected readonly auth = inject(AuthStore);
+  protected readonly cart = inject(CartStore);
+
   protected readonly navigationItems = PRIMARY_NAVIGATION;
   protected readonly profileUrl = APP_URLS.profile;
 

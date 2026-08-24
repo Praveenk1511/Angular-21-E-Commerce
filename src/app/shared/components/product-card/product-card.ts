@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { APP_URLS } from '@core/config/route-paths';
@@ -15,7 +15,7 @@ const BADGE_MAP: Record<ProductBadge, { label: string; variant: BadgeVariant }> 
 };
 
 /**
- * Product card for grid listings: thumbnail, name, brand placeholder, price, rating
+ * Product card for grid listings: thumbnail, name, brand, price, rating
  * and badges.
  *
  * Entirely presentational — it takes a `ProductSummary` as input and renders it. No
@@ -32,9 +32,16 @@ const BADGE_MAP: Record<ProductBadge, { label: string; variant: BadgeVariant }> 
   templateUrl: './product-card.html',
   styleUrl: './product-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.product-card--list]': "viewMode() === 'list'",
+  },
 })
 export class ProductCard {
   readonly product = input.required<ProductSummary>();
+  readonly brandName = input<string>();
+  readonly viewMode = input<'grid' | 'list'>('grid');
+
+  protected readonly imageFailed = signal(false);
 
   protected readonly url = computed(() => APP_URLS.productDetail(this.product().slug));
 
@@ -46,9 +53,21 @@ export class ProductCard {
     () => this.product().price.compareAtMinor !== undefined,
   );
 
+  protected readonly discountPercent = computed(() => {
+    const p = this.product().price;
+    if (!p.compareAtMinor || p.compareAtMinor <= p.amountMinor) {
+      return null;
+    }
+    return Math.round(((p.compareAtMinor - p.amountMinor) / p.compareAtMinor) * 100);
+  });
+
   protected readonly isUnavailable = computed(() => {
     const status = this.product().stock.status;
 
     return status === 'out-of-stock' || status === 'discontinued';
   });
+
+  protected handleImageError(): void {
+    this.imageFailed.set(true);
+  }
 }

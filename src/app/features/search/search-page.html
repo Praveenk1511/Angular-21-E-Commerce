@@ -1,0 +1,81 @@
+<app-page-container>
+  <div class="search-page">
+    <!-- Breadcrumbs -->
+    <nav class="search-page__breadcrumbs" aria-label="Breadcrumb">
+      <app-breadcrumb [items]="[{ label: 'Home', url: '/' }, { label: 'Search Results' }]" />
+    </nav>
+
+    <!-- Search Page Header -->
+    <header class="search-page__header">
+      <h1 class="search-page__title">
+        @if (q() && q()!.trim()) {
+          Search results for "{{ q()!.trim() }}"
+        } @else {
+          All Search Results
+        }
+      </h1>
+      @if (!loading() && !error()) {
+        <p class="search-page__subtitle">
+          Found {{ totalItems() }}
+          {{ totalItems() === 1 ? 'matching product' : 'matching products' }}
+        </p>
+      }
+    </header>
+
+    @if (error(); as errorMessage) {
+      <div class="search-page__error">
+        <app-error-state
+          [message]="errorMessage"
+          (retry)="loadResults((q() || '').trim(), page())"
+        />
+      </div>
+    } @else if (loading()) {
+      <div class="search-page__loading" aria-busy="true">
+        <div class="search-page__loading-top">
+          <app-spinner [size]="28" [label]="'Loading search results'" />
+          <app-skeleton [lines]="1" [width]="'40%'" />
+        </div>
+        <div class="search-page__grid">
+          @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+            <div class="search-page__skeleton-card">
+              <app-skeleton [variant]="'rect'" [height]="'12rem'" />
+              <app-skeleton [lines]="3" />
+            </div>
+          }
+        </div>
+      </div>
+    } @else if (products().length === 0) {
+      <div class="search-page__no-results">
+        <app-empty-state
+          [heading]="'No products found'"
+          [description]="
+            q() && q()!.trim()
+              ? 'We couldn\'t find any products matching &quot;' +
+                q()!.trim() +
+                '&quot;. Try checking for typos or searching for another term.'
+              : 'Try entering a search term to find products.'
+          "
+        />
+        <div class="search-page__browse-action">
+          <a [routerLink]="productsUrl" appButton variant="secondary">Browse All Products</a>
+        </div>
+      </div>
+    } @else {
+      <div class="search-page__grid">
+        @for (product of products(); track product.id) {
+          <app-product-card [product]="product" [brandName]="brandsMap().get(product.brandId)" />
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="search-page__pagination">
+          <app-pagination
+            [page]="page()"
+            [totalPages]="totalPages()"
+            (pageChange)="onPageChange($event)"
+          />
+        </div>
+      }
+    }
+  </div>
+</app-page-container>

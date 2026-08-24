@@ -1,0 +1,184 @@
+<div class="product-filters">
+  <div class="product-filters__header">
+    <h2 class="product-filters__title">
+      <app-icon name="info" [size]="18" />
+      Filters
+    </h2>
+    @if (hasActiveFilters()) {
+      <button type="button" class="product-filters__reset-btn" (click)="onResetAll()">
+        Clear All
+      </button>
+    }
+  </div>
+
+  <!-- Active Filter Chips -->
+  @if (hasActiveFilters()) {
+    <div class="product-filters__chips-section">
+      <span class="product-filters__chips-label">Active:</span>
+      <div class="product-filters__chips-list">
+        @for (chip of activeChips(); track chip.id) {
+          <span class="product-filters__chip">
+            {{ chip.label }}
+            <button
+              type="button"
+              class="product-filters__chip-remove"
+              (click)="removeChip(chip)"
+              aria-label="Remove filter"
+            >
+              <app-icon name="close" [size]="12" />
+            </button>
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Category & Subcategory Filter Section -->
+  @if (categories().length > 0) {
+    <section class="filter-section">
+      <h3 class="filter-section__title">Categories</h3>
+      <ul class="filter-category-tree">
+        <li>
+          <button
+            type="button"
+            class="filter-category-item"
+            [class.filter-category-item--active]="!selectedCategory()"
+            (click)="onCategorySelect(null)"
+          >
+            All Categories
+          </button>
+        </li>
+        @for (cat of categories(); track cat.id) {
+          <li>
+            <button
+              type="button"
+              class="filter-category-item"
+              [class.filter-category-item--active]="selectedCategory() === cat.id"
+              (click)="onCategorySelect(cat.id)"
+            >
+              <span class="filter-category-item__name">{{ cat.name }}</span>
+              <app-badge variant="brand" size="sm">{{ cat.totalProductCount }}</app-badge>
+            </button>
+
+            @if (cat.children && cat.children.length > 0) {
+              <ul class="filter-subcategory-list">
+                @for (sub of cat.children; track sub.id) {
+                  <li>
+                    <button
+                      type="button"
+                      class="filter-subcategory-item"
+                      [class.filter-subcategory-item--active]="selectedCategory() === sub.id"
+                      (click)="onCategorySelect(sub.id)"
+                    >
+                      <span class="filter-subcategory-item__name">{{ sub.name }}</span>
+                      <span class="filter-subcategory-item__count">({{ sub.totalProductCount }})</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- Brand Filter Section -->
+  @if (facets()?.brands; as brandFacets) {
+    @if (brandFacets.length > 0) {
+      <section class="filter-section">
+        <h3 class="filter-section__title">Brand</h3>
+        <div class="filter-checkbox-list">
+          @for (brand of brandFacets; track brand.id) {
+            <label class="filter-checkbox-item">
+              <input
+                type="checkbox"
+                class="filter-checkbox-input"
+                [checked]="selectedBrands().includes(brand.id)"
+                (change)="onBrandToggle(brand.id, $any($event.target).checked)"
+              />
+              <span class="filter-checkbox-item__label">{{ brand.label }}</span>
+              <span class="filter-checkbox-item__count">({{ brand.count }})</span>
+            </label>
+          }
+        </div>
+      </section>
+    }
+  }
+
+  <!-- Price Range Filter Section -->
+  <section class="filter-section">
+    <h3 class="filter-section__title">Price Range</h3>
+    <div class="filter-price-inputs">
+      <div class="filter-price-field">
+        <span class="filter-price-symbol">£</span>
+        <input
+          type="number"
+          min="0"
+          placeholder="Min"
+          class="filter-price-input"
+          [value]="localMinPrice()"
+          (input)="localMinPrice.set($any($event.target).value)"
+        />
+      </div>
+      <span class="filter-price-dash">-</span>
+      <div class="filter-price-field">
+        <span class="filter-price-symbol">£</span>
+        <input
+          type="number"
+          min="0"
+          placeholder="Max"
+          class="filter-price-input"
+          [value]="localMaxPrice()"
+          (input)="localMaxPrice.set($any($event.target).value)"
+        />
+      </div>
+      <button type="button" class="filter-price-apply-btn" (click)="applyPriceFilter()">
+        Apply
+      </button>
+    </div>
+  </section>
+
+  <!-- Minimum Rating Filter Section -->
+  <section class="filter-section">
+    <h3 class="filter-section__title">Minimum Rating</h3>
+    <div class="filter-rating-options">
+      @for (r of [4, 3, 2, 1]; track r) {
+        <button
+          type="button"
+          class="filter-rating-option"
+          [class.filter-rating-option--active]="minRating() === r"
+          (click)="onRatingSelect(minRating() === r ? null : r)"
+        >
+          <app-rating [rating]="r" />
+          <span class="filter-rating-text">& Up</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Toggle Filters Section (Availability & On Sale) -->
+  <section class="filter-section">
+    <h3 class="filter-section__title">Status & Deals</h3>
+    <div class="filter-toggle-list">
+      <label class="filter-checkbox-item">
+        <input
+          type="checkbox"
+          class="filter-checkbox-input"
+          [checked]="inStockOnly()"
+          (change)="onInStockToggle($any($event.target).checked)"
+        />
+        <span class="filter-checkbox-item__label">In Stock Only</span>
+      </label>
+      <label class="filter-checkbox-item">
+        <input
+          type="checkbox"
+          class="filter-checkbox-input"
+          [checked]="onSaleOnly()"
+          (change)="onOnSaleToggle($any($event.target).checked)"
+        />
+        <span class="filter-checkbox-item__label">On Sale Only</span>
+      </label>
+    </div>
+  </section>
+</div>

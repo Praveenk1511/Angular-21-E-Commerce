@@ -11,6 +11,8 @@ export const SEGMENTS = {
   // Storefront
   home: 'home',
   products: 'products',
+  search: 'search',
+  categories: 'categories',
   category: 'category',
   cart: 'cart',
   wishlist: 'wishlist',
@@ -28,7 +30,6 @@ export const SEGMENTS = {
   // Admin area
   admin: 'admin',
   dashboard: 'dashboard',
-  categories: 'categories',
   users: 'users',
   inventory: 'inventory',
   coupons: 'coupons',
@@ -51,7 +52,10 @@ export const SEGMENTS = {
 export const APP_URLS = {
   home: `/${SEGMENTS.home}`,
   products: `/${SEGMENTS.products}`,
+  search: (q?: string): string =>
+    q && q.trim() ? `/${SEGMENTS.search}?q=${encodeURIComponent(q.trim())}` : `/${SEGMENTS.search}`,
   productDetail: (id: string): string => `/${SEGMENTS.products}/${id}`,
+  categories: `/${SEGMENTS.categories}`,
   categoryDetail: (slug: string): string => `/${SEGMENTS.category}/${slug}`,
   cart: `/${SEGMENTS.cart}`,
   wishlist: `/${SEGMENTS.wishlist}`,

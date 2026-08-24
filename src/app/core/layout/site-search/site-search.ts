@@ -1,41 +1,86 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  input,
+  viewChild,
+} from '@angular/core';
+import { Router } from '@angular/router';
 
+import { APP_URLS } from '@core/config/route-paths';
 import { uniqueId } from '@core/utils/unique-id';
 import { Icon } from '@shared/components/icon/icon';
+import { Spinner } from '@shared/components/spinner/spinner';
+import { PricePipe } from '@shared/pipes/price.pipe';
+import { SearchStore } from '@state/search.store';
 
 /**
- * Storefront search field.
- *
- * The markup is the real, final semantic structure — a labelled search landmark
- * with a submit control — but the controls stay disabled until the search feature
- * is built. Rendering an enabled box that silently does nothing would be a worse
- * lie to users and to assistive technology than an honestly unavailable one.
- *
- * The owning phase flips `enabled` to `true` and binds the query; no markup or
- * styling needs to change.
+ * Storefront header search control with autocomplete dropdown, recent searches,
+ * suggestions, and direct navigation.
  */
 @Component({
   selector: 'app-site-search',
-  imports: [Icon],
+  imports: [Icon, Spinner, PricePipe],
   templateUrl: './site-search.html',
   styleUrl: './site-search.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(keydown.escape)': 'closeDropdown()',
+  },
 })
 export class SiteSearch {
-  /** Whether the field accepts input. Disabled placeholder until search ships. */
-  readonly enabled = input(false);
-
-  /** Accessible label, also used as the visible placeholder. */
+  readonly enabled = input(true);
   readonly label = input('Search products');
+
+  protected readonly store = inject(SearchStore);
+  private readonly router = inject(Router);
 
   protected readonly inputId = uniqueId('site-search-input');
   protected readonly hintId = uniqueId('site-search-hint');
 
-  /**
-   * Stops the browser performing a native GET submission and reloading the app.
-   * Query handling itself belongs to the search phase.
-   */
+  private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+
+  protected onInput(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.store.setQuery(val);
+  }
+
+  protected onFocus(): void {
+    this.store.setOpen(true);
+  }
+
+  protected closeDropdown(): void {
+    this.store.setOpen(false);
+  }
+
   protected onSubmit(event: Event): void {
     event.preventDefault();
+    const q = this.store.query().trim();
+    if (!q) {
+      return;
+    }
+    this.store.addRecentSearch(q);
+    this.store.setOpen(false);
+    this.searchInput()?.nativeElement.blur();
+    void this.router.navigateByUrl(APP_URLS.search(q));
+  }
+
+  protected selectSuggestion(term: string): void {
+    this.store.setQuery(term);
+    this.store.addRecentSearch(term);
+    this.store.setOpen(false);
+    void this.router.navigateByUrl(APP_URLS.search(term));
+  }
+
+  protected selectProduct(slug: string): void {
+    this.store.setOpen(false);
+    void this.router.navigateByUrl(APP_URLS.productDetail(slug));
+  }
+
+  protected removeRecent(event: Event, term: string): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.store.removeRecentSearch(term);
   }
 }

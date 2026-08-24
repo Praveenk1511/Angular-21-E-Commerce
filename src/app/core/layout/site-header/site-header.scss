@@ -98,6 +98,31 @@
   }
 }
 
+.site-header__action-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-header__cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background-color: var(--color-brand-primary, #2563eb);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  line-height: 1;
+}
+
 .site-header__action--active {
   color: var(--color-accent);
 }

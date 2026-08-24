@@ -1,6 +1,7 @@
 export * from './api.model';
 export * from './api-error';
 export * from './auth.model';
+export * from './cart.model';
 export * from './catalog.model';
 export * from './commerce.model';
 export * from './dashboard.model';

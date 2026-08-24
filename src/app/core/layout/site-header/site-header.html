@@ -51,7 +51,12 @@
             routerLinkActive="site-header__action--active"
             ariaCurrentWhenActive="page"
           >
-            <app-icon [name]="action.icon" [size]="21" />
+            <span class="site-header__action-icon-wrapper">
+              <app-icon [name]="action.icon" [size]="21" />
+              @if (action.id === 'cart' && cart.itemCount() > 0) {
+                <span class="site-header__cart-badge">{{ cart.itemCount() }}</span>
+              }
+            </span>
             <span class="site-header__action-label">{{ action.label }}</span>
           </a>
         </li>

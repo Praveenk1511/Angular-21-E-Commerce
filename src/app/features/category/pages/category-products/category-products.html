@@ -1,0 +1,108 @@
+<app-page-container>
+  <div class="category-products">
+    @if (store.notFound()) {
+      <div class="category-products__not-found">
+        <app-empty-state
+          [heading]="'Category Not Found'"
+          [description]="'The category you are looking for does not exist or has been removed.'"
+        />
+        <div class="category-products__back-action">
+          <a [routerLink]="categoriesUrl" appButton variant="secondary">Browse All Categories</a>
+        </div>
+      </div>
+    } @else if (store.error(); as errorMessage) {
+      <div class="category-products__error">
+        <app-error-state [message]="errorMessage" (retry)="store.loadCategoryBySlug(slug())" />
+      </div>
+    } @else if (store.loading()) {
+      <div class="category-products__loading" aria-busy="true">
+        <app-spinner [size]="28" [label]="'Loading category products'" />
+        <div class="category-products__banner-skeleton">
+          <app-skeleton [lines]="1" [width]="'40%'" />
+          <app-skeleton [lines]="2" [width]="'70%'" />
+        </div>
+        <div class="category-products__grid">
+          @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+            <div class="category-products__skeleton-card">
+              <app-skeleton [variant]="'rect'" [height]="'12rem'" />
+              <app-skeleton [lines]="3" />
+            </div>
+          }
+        </div>
+      </div>
+    } @else if (store.currentCategory(); as category) {
+      <!-- Breadcrumbs -->
+      <nav class="category-products__breadcrumbs" aria-label="Breadcrumb">
+        <app-breadcrumb
+          [items]="[
+            { label: 'Home', url: '/' },
+            { label: 'Categories', url: categoriesUrl },
+            ...(store.parentCategory()
+              ? [
+                  {
+                    label: store.parentCategory()!.name,
+                    url: getCategoryUrl(store.parentCategory()!.slug),
+                  },
+                ]
+              : []),
+            { label: category.name },
+          ]"
+        />
+      </nav>
+
+      <!-- Category Hero Banner -->
+      <header class="category-banner">
+        <div class="category-banner__content">
+          <div class="category-banner__header-row">
+            <h1 class="category-banner__title">{{ category.name }}</h1>
+            <app-badge [variant]="'brand'" [size]="'md'">
+              {{ store.totalItems() }} {{ store.totalItems() === 1 ? 'product' : 'products' }}
+            </app-badge>
+          </div>
+          <p class="category-banner__description">{{ category.description }}</p>
+        </div>
+      </header>
+
+      <!-- Subcategories Navigation Pills -->
+      @if (store.subcategories().length > 0) {
+        <nav class="subcategories-bar" aria-label="Subcategories">
+          <span class="subcategories-bar__label">Subcategories:</span>
+          <div class="subcategories-bar__pills">
+            @for (sub of store.subcategories(); track sub.id) {
+              <a [routerLink]="getCategoryUrl(sub.slug)" class="subcategories-bar__pill">
+                {{ sub.name }}
+              </a>
+            }
+          </div>
+        </nav>
+      }
+
+      <!-- Category Products Grid -->
+      @if (store.products().length === 0) {
+        <app-empty-state
+          [heading]="'No products in this category'"
+          [description]="'Check back later for new arrivals in ' + category.name + '.'"
+        />
+      } @else {
+        <div class="category-products__grid">
+          @for (product of store.products(); track product.id) {
+            <app-product-card
+              [product]="product"
+              [brandName]="store.brandsMap().get(product.brandId)"
+            />
+          }
+        </div>
+
+        @if (store.totalPages() > 1) {
+          <div class="category-products__pagination">
+            <app-pagination
+              [page]="store.page()"
+              [totalPages]="store.totalPages()"
+              (pageChange)="onPageChange($event)"
+            />
+          </div>
+        }
+      }
+    }
+  </div>
+</app-page-container>

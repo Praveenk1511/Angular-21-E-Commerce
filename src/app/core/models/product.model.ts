@@ -106,6 +106,7 @@ export interface ProductListQuery {
   readonly minRating?: number;
   /** Restrict to items a customer can actually buy today. */
   readonly inStockOnly?: boolean;
+  readonly onSaleOnly?: boolean;
   readonly tags?: readonly string[];
   readonly sort?: ProductSortField;
   readonly direction?: SortDirection;

@@ -1,0 +1,256 @@
+<app-page-container>
+  <div class="product-detail">
+    @if (store.notFound()) {
+      <div class="product-detail__not-found">
+        <app-empty-state
+          [heading]="'Product Not Found'"
+          [description]="'The product you are looking for does not exist or has been removed.'"
+        />
+        <div class="product-detail__back-action">
+          <a [routerLink]="productsUrl" appButton variant="secondary">Back to Shop</a>
+        </div>
+      </div>
+    } @else if (store.error(); as errorMessage) {
+      <div class="product-detail__error">
+        <app-error-state [message]="errorMessage" (retry)="store.loadProduct(id())" />
+      </div>
+    } @else if (store.loading()) {
+      <div class="product-detail__loading" aria-busy="true">
+        <div class="product-detail__loading-top">
+          <app-spinner [size]="28" [label]="'Loading product details'" />
+        </div>
+        <div class="product-detail__layout">
+          <div class="product-detail__gallery-skeleton">
+            <app-skeleton [variant]="'rect'" [height]="'24rem'" />
+            <div class="product-detail__thumbs-skeleton">
+              <app-skeleton [variant]="'rect'" [height]="'4rem'" />
+              <app-skeleton [variant]="'rect'" [height]="'4rem'" />
+              <app-skeleton [variant]="'rect'" [height]="'4rem'" />
+            </div>
+          </div>
+          <div class="product-detail__info-skeleton">
+            <app-skeleton [lines]="2" [width]="'70%'" />
+            <app-skeleton [lines]="1" [width]="'40%'" />
+            <app-skeleton [variant]="'rect'" [height]="'3rem'" />
+            <app-skeleton [lines]="4" />
+          </div>
+        </div>
+      </div>
+    } @else if (store.product(); as product) {
+      <!-- Breadcrumbs -->
+      <nav class="product-detail__breadcrumbs" aria-label="Breadcrumb">
+        <app-breadcrumb
+          [items]="[
+            { label: 'Home', url: '/' },
+            { label: 'Shop', url: productsUrl },
+            { label: product.name },
+          ]"
+        />
+      </nav>
+
+      <!-- Primary Product Layout -->
+      <div class="product-detail__main">
+        <!-- Image Gallery Column -->
+        <section class="product-detail__gallery" aria-label="Product Images">
+          <div class="product-detail__featured-image">
+            @if (store.currentImage(); as img) {
+              @if (img.url) {
+                <img [src]="img.url" [alt]="img.alt || product.name" loading="eager" />
+              } @else {
+                <div class="product-detail__image-fallback">
+                  <span>{{ product.name[0] }}</span>
+                </div>
+              }
+            }
+            @if (store.discountPercent(); as pct) {
+              <div class="product-detail__sale-badge">
+                <app-badge [variant]="'danger'" [size]="'md'">-{{ pct }}% OFF</app-badge>
+              </div>
+            }
+          </div>
+
+          <!-- Gallery Thumbnails -->
+          @if (product.images && product.images.length > 1) {
+            <div class="product-detail__thumbnails" role="tablist" aria-label="Product thumbnails">
+              @for (img of product.images; track img.url; let i = $index) {
+                <button
+                  type="button"
+                  class="product-detail__thumbnail-btn"
+                  [class.product-detail__thumbnail-btn--active]="store.selectedImageIndex() === i"
+                  (click)="store.selectImage(i)"
+                  [aria-label]="'View image ' + (i + 1)"
+                >
+                  <img [src]="img.url" [alt]="img.alt || product.name" />
+                </button>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Product Information Column -->
+        <section class="product-detail__info" aria-label="Product Details">
+          @if (store.brand(); as brand) {
+            <span class="product-detail__brand">{{ brand.name }}</span>
+          }
+
+          <h1 class="product-detail__title">{{ product.name }}</h1>
+
+          <div class="product-detail__meta">
+            <span class="product-detail__sku">SKU: {{ product.sku }}</span>
+            <div class="product-detail__rating">
+              <app-rating
+                [rating]="product.rating.average"
+                [showValue]="true"
+                [label]="product.name + ' rating'"
+              />
+              <span class="product-detail__reviews">({{ product.rating.count }} reviews)</span>
+            </div>
+          </div>
+
+          <!-- Price & Discounts -->
+          <div class="product-detail__price-block">
+            <span class="product-detail__price">
+              {{ product.price.amountMinor | price: product.price.currency }}
+            </span>
+            @if (product.price.compareAtMinor) {
+              <span class="product-detail__compare-price">
+                {{ product.price.compareAtMinor | price: product.price.currency }}
+              </span>
+            }
+          </div>
+
+          <!-- Stock Status -->
+          <div class="product-detail__stock-status">
+            @switch (product.stock.status) {
+              @case ('in-stock') {
+                <app-badge [variant]="'success'">In Stock</app-badge>
+                <span class="product-detail__stock-qty">
+                  {{ product.stock.available }} units available
+                </span>
+              }
+              @case ('low-stock') {
+                <app-badge [variant]="'warning'">Low Stock</app-badge>
+                <span class="product-detail__stock-qty">
+                  Only {{ product.stock.available }} left!
+                </span>
+              }
+              @case ('preorder') {
+                <app-badge [variant]="'brand'">Pre-order</app-badge>
+              }
+              @default {
+                <app-badge [variant]="'danger'">Out of Stock</app-badge>
+              }
+            }
+          </div>
+
+          <!-- Summary -->
+          <p class="product-detail__summary">{{ product.summary }}</p>
+
+          <!-- Finish / Variant Options -->
+          <div class="product-detail__variants">
+            <span class="product-detail__variant-label">Option / Finish</span>
+            <div class="product-detail__variant-options">
+              @for (
+                opt of ['Standard', 'Matte Black', 'Silver Alloy'];
+                track opt;
+                let isFirst = $first
+              ) {
+                <button
+                  type="button"
+                  class="product-detail__variant-chip"
+                  [class.product-detail__variant-chip--selected]="
+                    store.selectedVariant() === opt || (!store.selectedVariant() && isFirst)
+                  "
+                  (click)="store.selectVariant(opt)"
+                >
+                  {{ opt }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Quantity Selector & Actions -->
+          <div class="product-detail__actions">
+            <div class="product-detail__quantity">
+              <span class="product-detail__qty-label">Quantity</span>
+              <app-quantity-selector
+                [value]="store.quantity()"
+                [min]="1"
+                [max]="product.stock.available > 0 ? product.stock.available : 1"
+                [disabled]="!store.isAvailable()"
+                (valueChange)="store.setQuantity($event)"
+              />
+            </div>
+
+            <div class="product-detail__button-group">
+              <button
+                type="button"
+                appButton
+                variant="primary"
+                size="lg"
+                [disabled]="!store.isAvailable()"
+                (click)="handleAddToCart()"
+              >
+                <app-icon [name]="'cart'" />
+                Add to Cart
+              </button>
+
+              <button
+                type="button"
+                appButton
+                variant="secondary"
+                size="lg"
+                (click)="handleAddToWishlist()"
+                aria-label="Add to wishlist"
+              >
+                <app-icon [name]="'heart'" />
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Specs & Details Tabs / Accordion -->
+      <section class="product-detail__specs-section" aria-label="Specifications and Description">
+        <div class="product-detail__section-block">
+          <h2 class="product-detail__section-title">Product Overview</h2>
+          <p class="product-detail__description">{{ product.description }}</p>
+        </div>
+
+        @if (product.specifications && product.specifications.length > 0) {
+          <div class="product-detail__section-block">
+            <h2 class="product-detail__section-title">Technical Specifications</h2>
+            <dl class="product-detail__spec-grid">
+              @for (spec of product.specifications; track spec.label) {
+                <div class="product-detail__spec-row">
+                  <dt class="product-detail__spec-key">{{ spec.label }}</dt>
+                  <dd class="product-detail__spec-val">{{ spec.value }}</dd>
+                </div>
+              }
+              <div class="product-detail__spec-row">
+                <dt class="product-detail__spec-key">Weight</dt>
+                <dd class="product-detail__spec-val">{{ product.weightGrams }} g</dd>
+              </div>
+              <div class="product-detail__spec-row">
+                <dt class="product-detail__spec-key">Warranty</dt>
+                <dd class="product-detail__spec-val">{{ product.warrantyMonths }} months</dd>
+              </div>
+            </dl>
+          </div>
+        }
+      </section>
+
+      <!-- Related Products -->
+      @if (store.relatedProducts().length > 0) {
+        <section class="product-detail__related" aria-label="Related Products">
+          <h2 class="product-detail__section-title">You Might Also Like</h2>
+          <div class="product-detail__related-grid">
+            @for (rel of store.relatedProducts(); track rel.id) {
+              <app-product-card [product]="rel" />
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+</app-page-container>

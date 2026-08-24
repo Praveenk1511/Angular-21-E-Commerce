@@ -1,0 +1,69 @@
+<div class="product-sort-bar">
+  <div class="product-sort-bar__left">
+    <!-- Mobile Filter Trigger Button -->
+    <button
+      type="button"
+      class="product-sort-bar__mobile-filter-btn"
+      (click)="triggerMobileFilters()"
+    >
+      <app-icon name="menu" [size]="18" />
+      <span>Filters</span>
+      @if (activeFilterCount() > 0) {
+        <app-badge variant="brand" size="sm">{{ activeFilterCount() }}</app-badge>
+      }
+    </button>
+
+    <span class="product-sort-bar__count">
+      Showing <strong>{{ totalItems() }}</strong> {{ totalItems() === 1 ? 'product' : 'products' }}
+    </span>
+  </div>
+
+  <div class="product-sort-bar__right">
+    <!-- Sort Selection -->
+    <div class="product-sort-bar__select-wrapper">
+      <label class="product-sort-bar__label" for="catalog-sort-select">Sort by:</label>
+      <app-select
+        id="catalog-sort-select"
+        label="Sort by"
+        [labelHidden]="true"
+        [options]="options"
+        [ngModel]="sort()"
+        (ngModelChange)="onSortSelect($event)"
+      />
+    </div>
+
+    <!-- View Mode Switcher -->
+    <div class="product-sort-bar__view-toggle" role="group" aria-label="View mode">
+      <button
+        type="button"
+        class="product-sort-bar__view-btn"
+        [class.product-sort-bar__view-btn--active]="viewMode() === 'grid'"
+        (click)="setViewMode('grid')"
+        aria-label="Grid view"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="product-sort-bar__view-btn"
+        [class.product-sort-bar__view-btn--active]="viewMode() === 'list'"
+        (click)="setViewMode('list')"
+        aria-label="List view"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, forwardRef, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  forwardRef,
+  input,
+  output,
+} from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { uniqueId } from '@core/utils/unique-id';
@@ -6,7 +13,7 @@ import { Icon } from '@shared/components/icon/icon';
 import { BaseControl } from '@shared/forms/base-control';
 
 /**
- * Numeric stepper, usable with Reactive Forms.
+ * Numeric stepper, usable with Reactive Forms or direct [value]/(valueChange) binding.
  *
  * A real `<input type="number">` sits between the two buttons, so the value can be
  * typed, selected and pasted rather than only clicked up one at a time — a
@@ -33,6 +40,10 @@ export class QuantitySelector extends BaseControl<number> {
   readonly step = input(1);
   readonly disabled = input(false);
 
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  readonly valueInput = input<number | undefined>(undefined, { alias: 'value' });
+  readonly valueChange = output<number>();
+
   /** Hide the visible label, for use in dense rows that label the column instead. */
   readonly labelHidden = input(true);
 
@@ -40,7 +51,7 @@ export class QuantitySelector extends BaseControl<number> {
 
   protected readonly isDisabled = computed(() => this.disabled() || this.disabledByForm());
 
-  protected readonly current = computed(() => this.value() ?? this.min());
+  protected readonly current = computed(() => this.valueInput() ?? this.value() ?? this.min());
 
   protected readonly canDecrease = computed(
     () => !this.isDisabled() && this.current() > this.min(),
@@ -63,6 +74,13 @@ export class QuantitySelector extends BaseControl<number> {
 
     // An empty or non-numeric field falls back to the minimum rather than NaN.
     this.commit(Number.isNaN(raw) ? this.min() : this.clamp(raw));
+  }
+
+  override commit(val: number | null): void {
+    const safeVal = val ?? this.min();
+
+    super.commit(safeVal);
+    this.valueChange.emit(safeVal);
   }
 
   private clamp(value: number): number {

@@ -57,6 +57,21 @@ export const routes: Routes = [
           import('@features/products/products.routes').then((m) => m.PRODUCTS_ROUTES),
       },
       {
+        path: SEGMENTS.search,
+        title: 'Search results',
+        data: { breadcrumb: 'Search' } satisfies AppRouteData,
+        loadComponent: () => import('@features/search/search-page').then((m) => m.SearchPage),
+      },
+      {
+        path: SEGMENTS.categories,
+        title: 'Categories',
+        data: { breadcrumb: 'Categories' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('@features/category/pages/category-list/category-list').then(
+            (m) => m.CategoryList,
+          ),
+      },
+      {
         path: SEGMENTS.category,
         loadChildren: () =>
           import('@features/category/category.routes').then((m) => m.CATEGORY_ROUTES),

@@ -1,0 +1,133 @@
+<app-page-container>
+  <div class="product-list-page">
+    <header class="product-list-page__header">
+      <h1 class="product-list-page__title">Shop Products</h1>
+      <p class="product-list-page__subtitle">
+        Explore our complete catalog with advanced filtering by brand, price, category, and rating.
+      </p>
+    </header>
+
+    <div class="product-list-page__layout">
+      <!-- Desktop Sidebar Filters (Hidden on Mobile) -->
+      <aside class="product-list-page__sidebar" aria-label="Filters">
+        <app-product-filters
+          [facets]="store.facets()"
+          [categories]="store.categoryTree()"
+          [selectedCategory]="store.selectedCategory()"
+          [selectedBrands]="store.selectedBrands()"
+          [minPrice]="store.minPrice()"
+          [maxPrice]="store.maxPrice()"
+          [minRating]="store.minRating()"
+          [inStockOnly]="store.inStockOnly()"
+          [onSaleOnly]="store.onSaleOnly()"
+          (categoryChange)="store.setCategory($event)"
+          (brandChange)="store.setBrands($event)"
+          (priceRangeChange)="store.setPriceRange($event.min, $event.max)"
+          (ratingChange)="store.setRating($event)"
+          (inStockChange)="store.setInStockOnly($event)"
+          (onSaleChange)="store.setOnSaleOnly($event)"
+          (resetFilters)="store.resetFilters()"
+        />
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="product-list-page__main">
+        <!-- Top Toolbar (Sort, View Switcher, Mobile Filter Trigger) -->
+        <app-product-sort
+          [totalItems]="store.totalItems()"
+          [sort]="store.sort()"
+          [viewMode]="store.viewMode()"
+          [activeFilterCount]="store.activeFilterCount()"
+          (sortChange)="store.setSort($event)"
+          (viewModeChange)="store.setViewMode($event)"
+          (openMobileFilters)="openMobileDrawer()"
+        />
+
+        <!-- Loading / Error / Content states -->
+        @if (store.error(); as errorMessage) {
+          <div class="product-list-page__error">
+            <app-error-state [message]="errorMessage" (retry)="store.load()" />
+          </div>
+        } @else if (store.loading()) {
+          <div class="product-list-page__loading" aria-busy="true">
+            <app-spinner [size]="28" [label]="'Loading product catalog'" />
+            <div
+              class="product-list-page__grid"
+              [class.product-list-page__grid--list]="store.viewMode() === 'list'"
+            >
+              @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                <div class="product-list-page__skeleton-card">
+                  <app-skeleton [variant]="'rect'" [height]="'12rem'" />
+                  <app-skeleton [lines]="3" />
+                </div>
+              }
+            </div>
+          </div>
+        } @else if (store.products().length === 0) {
+          <div class="product-list-page__empty">
+            <app-empty-state
+              [heading]="'No matching products found'"
+              [description]="'Try adjusting or resetting your filter criteria to see more results.'"
+            />
+            <div class="product-list-page__empty-action">
+              <button type="button" class="btn-reset" (click)="store.resetFilters()">
+                Reset All Filters
+              </button>
+            </div>
+          </div>
+        } @else {
+          <!-- Products Grid or List -->
+          <div
+            class="product-list-page__grid"
+            [class.product-list-page__grid--list]="store.viewMode() === 'list'"
+          >
+            @for (product of store.products(); track product.id) {
+              <app-product-card
+                [product]="product"
+                [brandName]="store.brandsMap().get(product.brandId)"
+                [viewMode]="store.viewMode()"
+              />
+            }
+          </div>
+
+          <!-- Pagination -->
+          @if (store.totalPages() > 1) {
+            <div class="product-list-page__pagination">
+              <app-pagination
+                [page]="store.page()"
+                [totalPages]="store.totalPages()"
+                (pageChange)="onPageChange($event)"
+              />
+            </div>
+          }
+        }
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile Filters Drawer Overlay -->
+  <app-drawer
+    [(open)]="mobileDrawerOpen"
+    heading="Filter Products"
+    side="start"
+  >
+    <app-product-filters
+      [facets]="store.facets()"
+      [categories]="store.categoryTree()"
+      [selectedCategory]="store.selectedCategory()"
+      [selectedBrands]="store.selectedBrands()"
+      [minPrice]="store.minPrice()"
+      [maxPrice]="store.maxPrice()"
+      [minRating]="store.minRating()"
+      [inStockOnly]="store.inStockOnly()"
+      [onSaleOnly]="store.onSaleOnly()"
+      (categoryChange)="store.setCategory($event)"
+      (brandChange)="store.setBrands($event)"
+      (priceRangeChange)="store.setPriceRange($event.min, $event.max)"
+      (ratingChange)="store.setRating($event)"
+      (inStockChange)="store.setInStockOnly($event)"
+      (onSaleChange)="store.setOnSaleOnly($event)"
+      (resetFilters)="store.resetFilters()"
+    />
+  </app-drawer>
+</app-page-container>
