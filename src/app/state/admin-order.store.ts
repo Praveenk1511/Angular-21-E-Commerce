@@ -371,6 +371,10 @@ export class AdminOrderStore {
     this.selectedOrder.set(null);
   }
 
+  canCancel(status: OrderStatus): boolean {
+    return status === 'pending' || status === 'confirmed' || status === 'processing' || status === 'on-hold';
+  }
+
   // ---------- State Machine & Transition Actions ----------
 
   isValidTransition(currentStatus: OrderStatus, targetStatus: OrderStatus): boolean {
