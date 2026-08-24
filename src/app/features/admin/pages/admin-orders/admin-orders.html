@@ -1,0 +1,348 @@
+<div class="admin-orders">
+  <!-- PAGE HEADER -->
+  <header class="orders-header">
+    <div class="orders-header__title-group">
+      <h1 class="orders-header__title">Order Fulfillment Management</h1>
+      <p class="orders-header__subtitle">
+        Track customer orders, manage status workflow transitions, process returns, and issue refunds.
+      </p>
+    </div>
+  </header>
+
+  <!-- SEARCH, FILTER & SORT BAR -->
+  <div class="orders-controls">
+    <div class="orders-controls__search">
+      <app-icon name="search" [size]="18" class="search-icon" />
+      <input
+        type="search"
+        [value]="store.searchQuery()"
+        (input)="store.setSearchQuery($any($event.target).value)"
+        placeholder="Search orders by ID, reference, customer name, phone..."
+        class="search-input"
+      />
+      @if (store.searchQuery()) {
+        <button
+          type="button"
+          class="search-clear-btn"
+          (click)="store.setSearchQuery('')"
+          aria-label="Clear search"
+        >
+          <app-icon name="close" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <div class="orders-controls__sort">
+      <label for="order-sort" class="sort-label">Sort:</label>
+      <select
+        id="order-sort"
+        [value]="store.sortOption()"
+        (change)="store.setSortOption($any($event.target).value)"
+        class="sort-select"
+      >
+        <option value="date-desc">Newest Placed</option>
+        <option value="date-asc">Oldest Placed</option>
+        <option value="total-desc">Total High to Low</option>
+        <option value="total-asc">Total Low to High</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STATUS FILTER PILLS -->
+  <nav class="status-pills-bar" aria-label="Order Status Filter Tabs">
+    @for (st of ['all', 'pending', 'confirmed', 'processing', 'shipped', 'out-for-delivery', 'delivered', 'cancelled', 'returned', 'refunded']; track st) {
+      <button
+        type="button"
+        class="status-pill"
+        [class.status-pill--active]="store.statusFilter() === st"
+        (click)="store.setStatusFilter($any(st))"
+      >
+        {{ st === 'all' ? 'All Orders' : st }}
+      </button>
+    }
+  </nav>
+
+  <!-- ORDER DATA TABLE -->
+  @if (store.paginatedData().items.length === 0) {
+    <div class="orders-empty">
+      <app-empty-state
+        [heading]="'No orders found'"
+        [description]="'No customer orders match your search query or selected status filter.'"
+      />
+    </div>
+  } @else {
+    <div class="orders-table-card">
+      <div class="table-container">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order Reference</th>
+              <th>Customer</th>
+              <th>Date Placed</th>
+              <th>Items</th>
+              <th>Grand Total</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ord of store.paginatedData().items; track ord.id) {
+              <tr>
+                <td>
+                  <strong class="order-ref">{{ ord.reference }}</strong>
+                </td>
+                <td>
+                  <div class="customer-cell">
+                    <strong class="customer-name">{{ ord.shippingAddress.recipient }}</strong>
+                    <span class="customer-phone">{{ ord.shippingAddress.phone }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="date-cell">{{ ord.placedAt | date: 'medium' }}</span>
+                </td>
+                <td>
+                  <span class="item-count">{{ ord.itemCount }} {{ ord.itemCount === 1 ? 'item' : 'items' }}</span>
+                </td>
+                <td>
+                  <strong class="total-cell">{{ ord.totals.grandTotalMinor | price: ord.totals.currency }}</strong>
+                </td>
+                <td>
+                  <div class="payment-cell">
+                    <span class="payment-brand">{{ ord.payment.brand }} ({{ ord.payment.maskedIdentifier }})</span>
+                    <app-badge [variant]="ord.payment.status === 'paid' ? 'success' : 'warning'" size="sm">
+                      {{ ord.payment.status }}
+                    </app-badge>
+                  </div>
+                </td>
+                <td>
+                  <!-- Quick Workflow Transition Dropdown -->
+                  <div class="status-cell">
+                    <app-badge [variant]="getOrderStatusVariant(ord.status)" size="sm">
+                      {{ ord.status }}
+                    </app-badge>
+
+                    @if (store.getValidNextStatuses(ord.status).length > 0) {
+                      <select
+                        class="status-change-select"
+                        (change)="onStatusChange(ord, $event)"
+                        title="Transition Order Status"
+                      >
+                        <option value="">Change Status...</option>
+                        @for (nextSt of store.getValidNextStatuses(ord.status); track nextSt) {
+                          <option [value]="nextSt">→ {{ nextSt }}</option>
+                        }
+                      </select>
+                    }
+                  </div>
+                </td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="store.openOrderDetails(ord)"
+                      title="View Full Order Details"
+                    >
+                      <app-icon name="info" [size]="16" />
+                      <span>Details</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGINATION BAR -->
+    @if (store.paginatedData().totalPages > 1) {
+      <nav class="orders-pagination" aria-label="Orders Pagination">
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === 1"
+          (click)="store.setPage(store.paginatedData().currentPage - 1)"
+        >
+          <app-icon name="chevron-left" [size]="16" />
+          Previous
+        </button>
+
+        <div class="pagination-pages">
+          @for (p of [].constructor(store.paginatedData().totalPages); track $index; let pageNum = $index) {
+            <button
+              type="button"
+              class="pagination-num"
+              [class.pagination-num--active]="store.paginatedData().currentPage === (pageNum + 1)"
+              (click)="store.setPage(pageNum + 1)"
+            >
+              {{ pageNum + 1 }}
+            </button>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === store.paginatedData().totalPages"
+          (click)="store.setPage(store.paginatedData().currentPage + 1)"
+        >
+          Next
+          <app-icon name="chevron-right" [size]="16" />
+        </button>
+      </nav>
+    }
+  }
+
+  <!-- ORDER DETAILS DRAWER OVERLAY -->
+  @if (store.selectedOrder(); as activeOrd) {
+    <div class="modal-backdrop" (click)="store.closeOrderDetails()">
+      <div class="modal-card modal-card--lg" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header">
+          <div>
+            <h2 class="modal-card__title">Order Details: {{ activeOrd.reference }}</h2>
+            <span class="placed-date">Placed on {{ activeOrd.placedAt | date: 'fullDate' }}</span>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.closeOrderDetails()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <div class="order-details-body">
+          <!-- Status Banner & Workflow Actions -->
+          <div class="order-status-banner">
+            <div class="status-info">
+              <span>Current Status:</span>
+              <app-badge [variant]="getOrderStatusVariant(activeOrd.status)" size="md">
+                {{ activeOrd.status }}
+              </app-badge>
+            </div>
+
+            <div class="status-actions">
+              @for (nextSt of store.getValidNextStatuses(activeOrd.status); track nextSt) {
+                <button
+                  type="button"
+                  appButton
+                  variant="primary"
+                  size="sm"
+                  (click)="advanceStatus(activeOrd, nextSt)"
+                >
+                  Advance to {{ nextSt }}
+                </button>
+              }
+
+              @if (store.canCancel(activeOrd.status)) {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  size="sm"
+                  (click)="cancelOrder(activeOrd)"
+                >
+                  Cancel Order
+                </button>
+              }
+
+              @if (activeOrd.status === 'delivered') {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  size="sm"
+                  (click)="processReturn(activeOrd)"
+                >
+                  Process Return
+                </button>
+              }
+
+              @if (activeOrd.status === 'cancelled' || activeOrd.status === 'returned' || activeOrd.status === 'delivered') {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  size="sm"
+                  (click)="refundOrder(activeOrd)"
+                >
+                  Issue Refund
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Customer & Shipping Grid -->
+          <div class="details-grid-2">
+            <div class="info-card">
+              <h3>Shipping Destination</h3>
+              <strong>{{ activeOrd.shippingAddress.recipient }}</strong>
+              <p>{{ activeOrd.shippingAddress.line1 }} {{ activeOrd.shippingAddress.line2 }}</p>
+              <p>{{ activeOrd.shippingAddress.city }}, {{ activeOrd.shippingAddress.postcode }}</p>
+              <p>Phone: {{ activeOrd.shippingAddress.phone }}</p>
+            </div>
+
+            <div class="info-card">
+              <h3>Shipping & Carrier</h3>
+              <p>Method: <strong>{{ activeOrd.shipping.method }}</strong></p>
+              <p>Carrier: <strong>{{ activeOrd.shipping.carrier }}</strong></p>
+              <p>Tracking #: <code>{{ activeOrd.shipping.trackingNumber || 'Pending' }}</code></p>
+            </div>
+          </div>
+
+          <!-- Purchased Items Table -->
+          <div class="items-card">
+            <h3>Purchased Line Items</h3>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th class="text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of activeOrd.lines; track line.id) {
+                  <tr>
+                    <td><strong>{{ line.productName }}</strong></td>
+                    <td><code>{{ line.sku }}</code></td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.unitPrice.amountMinor | price: line.unitPrice.currency }}</td>
+                    <td class="text-right"><strong>{{ line.lineTotalMinor | price: activeOrd.totals.currency }}</strong></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Order Timeline Stepper -->
+          <div class="timeline-card">
+            <h3>Fulfillment Audit Timeline</h3>
+            <ol class="timeline-list">
+              @for (ev of activeOrd.timeline; track ev.at) {
+                <li class="timeline-item">
+                  <div class="timeline-item__dot"></div>
+                  <div class="timeline-item__content">
+                    <div class="timeline-item__top">
+                      <app-badge [variant]="getOrderStatusVariant(ev.status)" size="sm">
+                        {{ ev.status }}
+                      </app-badge>
+                      <span class="timeline-item__time">{{ ev.at | date: 'medium' }}</span>
+                    </div>
+                    <p class="timeline-item__note">{{ ev.note }}</p>
+                  </div>
+                </li>
+              }
+            </ol>
+          </div>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" appButton variant="secondary" size="md" (click)="store.closeOrderDetails()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

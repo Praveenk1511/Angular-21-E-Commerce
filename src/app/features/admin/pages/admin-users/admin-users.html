@@ -1,0 +1,284 @@
+<div class="admin-users">
+  <!-- PAGE HEADER -->
+  <header class="users-header">
+    <div class="users-header__title-group">
+      <h1 class="users-header__title">User Management</h1>
+      <p class="users-header__subtitle">
+        Manage customer accounts, assign system roles (Customer, Manager, Admin), and toggle account statuses.
+      </p>
+    </div>
+  </header>
+
+  <!-- SEARCH & ROLE FILTER BAR -->
+  <div class="users-controls">
+    <div class="users-controls__search">
+      <app-icon name="search" [size]="18" class="search-icon" />
+      <input
+        type="search"
+        [value]="store.searchQuery()"
+        (input)="store.setSearchQuery($any($event.target).value)"
+        placeholder="Search users by name, email, or ID..."
+        class="search-input"
+      />
+      @if (store.searchQuery()) {
+        <button
+          type="button"
+          class="search-clear-btn"
+          (click)="store.setSearchQuery('')"
+          aria-label="Clear search"
+        >
+          <app-icon name="close" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <!-- ROLE FILTER PILLS -->
+    <nav class="role-pills-bar" aria-label="User Role Filter">
+      @for (role of ['ALL', 'CUSTOMER', 'MANAGER', 'ADMIN']; track role) {
+        <button
+          type="button"
+          class="role-pill"
+          [class.role-pill--active]="store.roleFilter() === role"
+          (click)="store.setRoleFilter($any(role))"
+        >
+          {{ role === 'ALL' ? 'All Roles' : role }}
+        </button>
+      }
+    </nav>
+  </div>
+
+  <!-- USER DATA TABLE -->
+  @if (store.paginatedData().items.length === 0) {
+    <div class="users-empty">
+      <app-empty-state
+        [heading]="'No users found'"
+        [description]="'No user accounts match your search query or selected role filter.'"
+      />
+    </div>
+  } @else {
+    <div class="users-table-card">
+      <div class="table-container">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>User Profile</th>
+              <th>System Role</th>
+              <th>Account Status</th>
+              <th>Orders Placed</th>
+              <th>Registered Date</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usr of store.paginatedData().items; track usr.id) {
+              <tr>
+                <td>
+                  <div class="user-profile-cell">
+                    <div class="avatar-circle">
+                      {{ getUserInitials(usr.name) }}
+                    </div>
+                    <div class="profile-info">
+                      <strong class="user-name">{{ usr.name }}</strong>
+                      <span class="user-email">{{ usr.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="role-cell">
+                    <app-badge [variant]="getRoleBadgeVariant(usr.role)" size="sm">
+                      {{ usr.role }}
+                    </app-badge>
+
+                    <select
+                      class="role-change-select"
+                      [value]="usr.role"
+                      (change)="onRoleSelectChange(usr, $event)"
+                      title="Change System Role"
+                    >
+                      <option value="CUSTOMER">CUSTOMER</option>
+                      <option value="MANAGER">MANAGER</option>
+                      <option value="ADMIN">ADMIN</option>
+                    </select>
+                  </div>
+                </td>
+                <td>
+                  <app-badge [variant]="usr.status === 'active' ? 'success' : 'neutral'" size="sm">
+                    {{ usr.status }}
+                  </app-badge>
+                </td>
+                <td>
+                  <span class="order-count">{{ usr.orderCount }} {{ usr.orderCount === 1 ? 'order' : 'orders' }}</span>
+                </td>
+                <td>
+                  <span class="date-cell">{{ usr.registeredAt | date: 'mediumDate' }}</span>
+                </td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="store.openViewModal(usr)"
+                      title="View Profile Details"
+                    >
+                      <app-icon name="user" [size]="16" />
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn"
+                      [class.action-btn--danger]="usr.status === 'active'"
+                      (click)="store.promptStatusToggle(usr)"
+                      [title]="usr.status === 'active' ? 'Deactivate User' : 'Activate User'"
+                    >
+                      <app-icon [name]="usr.status === 'active' ? 'close' : 'check'" [size]="16" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGINATION BAR -->
+    @if (store.paginatedData().totalPages > 1) {
+      <nav class="users-pagination" aria-label="Users Pagination">
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === 1"
+          (click)="store.setPage(store.paginatedData().currentPage - 1)"
+        >
+          <app-icon name="chevron-left" [size]="16" />
+          Previous
+        </button>
+
+        <div class="pagination-pages">
+          @for (p of [].constructor(store.paginatedData().totalPages); track $index; let pageNum = $index) {
+            <button
+              type="button"
+              class="pagination-num"
+              [class.pagination-num--active]="store.paginatedData().currentPage === (pageNum + 1)"
+              (click)="store.setPage(pageNum + 1)"
+            >
+              {{ pageNum + 1 }}
+            </button>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === store.paginatedData().totalPages"
+          (click)="store.setPage(store.paginatedData().currentPage + 1)"
+        >
+          Next
+          <app-icon name="chevron-right" [size]="16" />
+        </button>
+      </nav>
+    }
+  }
+
+  <!-- VIEW USER DETAILS MODAL -->
+  @if (store.viewingUser(); as vUser) {
+    <div class="modal-backdrop" (click)="store.closeModals()">
+      <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header">
+          <div class="header-profile-row">
+            <div class="avatar-circle avatar-circle--lg">
+              {{ getUserInitials(vUser.name) }}
+            </div>
+            <div>
+              <h2 class="modal-card__title">{{ vUser.name }}</h2>
+              <span class="user-email-subtitle">{{ vUser.email }}</span>
+            </div>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.closeModals()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <div class="user-details-body">
+          <div class="details-row">
+            <strong>System Role:</strong>
+            <app-badge [variant]="getRoleBadgeVariant(vUser.role)">{{ vUser.role }}</app-badge>
+          </div>
+          <div class="details-row">
+            <strong>Account Status:</strong>
+            <app-badge [variant]="vUser.status === 'active' ? 'success' : 'neutral'">{{ vUser.status }}</app-badge>
+          </div>
+          <div class="details-row">
+            <strong>Registered On:</strong>
+            <span>{{ vUser.registeredAt | date: 'fullDate' }}</span>
+          </div>
+          <div class="details-row">
+            <strong>Last Active:</strong>
+            <span>{{ vUser.lastActiveAt | date: 'medium' }}</span>
+          </div>
+          <div class="details-row">
+            <strong>Total Orders Placed:</strong>
+            <span>{{ vUser.orderCount }} orders</span>
+          </div>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" appButton variant="secondary" size="md" (click)="store.closeModals()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- DESTRUCTIVE CONFIRMATION DIALOG MODAL -->
+  @if (store.confirmingAction(); as cAction) {
+    <div class="modal-backdrop" (click)="store.cancelAction()">
+      <div class="modal-card modal-card--danger" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header modal-card__header--danger">
+          <div class="danger-title-row">
+            <app-icon name="alert-triangle" [size]="22" class="text-danger" />
+            <h2 class="modal-card__title">
+              {{ cAction.action === 'change-role' ? 'Change User Role?' : (cAction.action === 'deactivate' ? 'Deactivate Account?' : 'Activate Account?') }}
+            </h2>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.cancelAction()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <div class="modal-card__body">
+          <p>
+            Are you sure you want to
+            @if (cAction.action === 'change-role') {
+              change role for <strong>"{{ cAction.user.name }}"</strong> to <strong>{{ cAction.newRole }}</strong>?
+            } @else {
+              {{ cAction.action }} account for <strong>"{{ cAction.user.name }}"</strong>?
+            }
+          </p>
+
+          <div class="danger-warning-box">
+            <app-icon name="info" [size]="18" />
+            <p>
+              Modifying user permissions or account status takes effect immediately across system sessions.
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" appButton variant="secondary" size="md" (click)="store.cancelAction()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            appButton
+            [variant]="cAction.action === 'deactivate' ? 'danger' : 'primary'"
+            size="md"
+            (click)="confirmUserAction()"
+          >
+            Confirm {{ cAction.action === 'change-role' ? 'Role Change' : (cAction.action === 'deactivate' ? 'Deactivation' : 'Activation') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

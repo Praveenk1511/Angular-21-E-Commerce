@@ -30,6 +30,27 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/admin-products/admin-products').then((m) => m.AdminProductsPage),
       },
+      {
+        path: 'categories',
+        title: 'Category Management',
+        data: { breadcrumb: 'Categories' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./pages/admin-categories/admin-categories').then((m) => m.AdminCategoriesPage),
+      },
+      {
+        path: 'orders',
+        title: 'Order Fulfillment',
+        data: { breadcrumb: 'Orders' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./pages/admin-orders/admin-orders').then((m) => m.AdminOrders),
+      },
+      {
+        path: 'users',
+        title: 'User Management',
+        data: { breadcrumb: 'Users' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./pages/admin-users/admin-users').then((m) => m.AdminUsers),
+      },
     ],
   },
 ];

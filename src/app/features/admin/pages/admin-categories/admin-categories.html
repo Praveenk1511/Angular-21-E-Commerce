@@ -1,0 +1,296 @@
+<div class="admin-categories">
+  <!-- PAGE HEADER & CONTROLS -->
+  <header class="categories-header">
+    <div class="categories-header__title-group">
+      <h1 class="categories-header__title">Category Management</h1>
+      <p class="categories-header__subtitle">
+        Organize catalog hierarchy, subcategories, parent assignments, and banner images.
+      </p>
+    </div>
+
+    <div class="categories-header__action">
+      <button type="button" appButton variant="primary" size="md" (click)="openAddModal()">
+        <app-icon name="plus" [size]="18" />
+        Add New Category
+      </button>
+    </div>
+  </header>
+
+  <!-- SEARCH BAR -->
+  <div class="categories-search-bar">
+    <div class="categories-search-bar__input-wrapper">
+      <app-icon name="search" [size]="18" class="search-icon" />
+      <input
+        type="search"
+        [value]="store.searchQuery()"
+        (input)="store.setSearchQuery($any($event.target).value)"
+        placeholder="Search categories by name, slug, or description..."
+        class="search-input"
+      />
+      @if (store.searchQuery()) {
+        <button
+          type="button"
+          class="search-clear-btn"
+          (click)="store.setSearchQuery('')"
+          aria-label="Clear search"
+        >
+          <app-icon name="close" [size]="14" />
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- CATEGORY DATA TABLE -->
+  @if (store.filteredCategories().length === 0) {
+    <div class="categories-empty">
+      <app-empty-state
+        [heading]="'No categories found'"
+        [description]="'No categories match your search criteria. Try a different keyword or create a new category.'"
+      />
+    </div>
+  } @else {
+    <div class="categories-table-card">
+      <div class="table-container">
+        <table class="categories-table">
+          <thead>
+            <tr>
+              <th>Banner</th>
+              <th>Category Name & Slug</th>
+              <th>Hierarchy / Parent</th>
+              <th>Products</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of store.filteredCategories(); track cat.id) {
+              <tr [class.subcategory-row]="cat.parentId !== null">
+                <td>
+                  <div class="category-banner-thumb">
+                    @if (cat.imageUrl) {
+                      <img [src]="cat.imageUrl" [alt]="cat.name" />
+                    } @else {
+                      <div class="banner-fallback">
+                        <app-icon name="menu" [size]="18" />
+                      </div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="category-name-cell">
+                    <div class="name-row">
+                      @if (cat.parentId) {
+                        <span class="tree-branch-icon">└─</span>
+                      }
+                      <strong class="category-name">{{ cat.name }}</strong>
+                    </div>
+                    <code class="slug-tag">/{{ cat.slug }}</code>
+                    <p class="category-desc">{{ cat.description }}</p>
+                  </div>
+                </td>
+                <td>
+                  <app-badge
+                    [variant]="cat.parentId ? 'neutral' : 'brand'"
+                    size="sm"
+                  >
+                    {{ store.getParentCategoryName(cat.parentId) }}
+                  </app-badge>
+                </td>
+                <td>
+                  <span class="product-count-badge">
+                    {{ cat.productCount }} {{ cat.productCount === 1 ? 'item' : 'items' }}
+                  </span>
+                </td>
+                <td>
+                  <app-badge [variant]="getStatusVariant(cat.status)" size="sm">
+                    {{ cat.status || 'active' }}
+                  </app-badge>
+                </td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="openEditModal(cat)"
+                      title="Edit Category"
+                    >
+                      <app-icon name="star" [size]="16" />
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn action-btn--danger"
+                      (click)="store.promptDelete(cat)"
+                      title="Delete Category"
+                    >
+                      <app-icon name="close" [size]="16" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- ADD / EDIT CATEGORY MODAL OVERLAY -->
+  @if (store.isFormOpen()) {
+    <div class="modal-backdrop" (click)="store.closeModals()">
+      <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header">
+          <h2 class="modal-card__title">
+            {{ store.editingCategory() ? 'Edit Category' : 'Add New Category' }}
+          </h2>
+          <button type="button" class="modal-card__close" (click)="store.closeModals()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="category-form">
+          <div class="form-group">
+            <label for="cat-name" class="form-label">Category Name *</label>
+            <input
+              id="cat-name"
+              type="text"
+              formControlName="name"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('name')"
+              placeholder="e.g. Office Chairs"
+            />
+            @if (isControlInvalid('name')) {
+              <span class="form-error">Category name is required (min 2 chars).</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="cat-slug" class="form-label">URL Slug (Optional)</label>
+            <input
+              id="cat-slug"
+              type="text"
+              formControlName="slug"
+              class="form-control"
+              placeholder="e.g. office-chairs (auto-generated if empty)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cat-parent" class="form-label">Parent Category (Subcategory Parent)</label>
+            <select id="cat-parent" formControlName="parentId" class="form-control">
+              <option [value]="null">None (Top-Level Category)</option>
+              @for (pCat of store.parentCategories(); track pCat.id) {
+                @if (!store.editingCategory() || store.editingCategory()?.id !== pCat.id) {
+                  <option [value]="pCat.id">Parent: {{ pCat.name }}</option>
+                }
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="cat-desc" class="form-label">Description *</label>
+            <textarea
+              id="cat-desc"
+              rows="3"
+              formControlName="description"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('description')"
+              placeholder="Brief description of products in this category..."
+            ></textarea>
+            @if (isControlInvalid('description')) {
+              <span class="form-error">Description is required (min 5 chars).</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="cat-img" class="form-label">Banner Image URL</label>
+            <input
+              id="cat-img"
+              type="url"
+              formControlName="imageUrl"
+              class="form-control"
+              placeholder="https://images.unsplash.com/..."
+            />
+            @if (categoryForm.value.imageUrl) {
+              <div class="image-preview">
+                <img [src]="categoryForm.value.imageUrl" alt="Banner Preview" />
+              </div>
+            }
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cat-pos" class="form-label">Display Order Position</label>
+              <input
+                id="cat-pos"
+                type="number"
+                formControlName="position"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cat-status" class="form-label">Status *</label>
+              <select id="cat-status" formControlName="status" class="form-control">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-card__footer">
+            <button type="button" appButton variant="secondary" size="md" (click)="store.closeModals()">
+              Cancel
+            </button>
+            <button type="submit" appButton variant="primary" size="md">
+              Save Category
+              <app-icon name="check" [size]="16" />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- DESTRUCTIVE ACTION CONFIRMATION DIALOG MODAL -->
+  @if (store.confirmingDeleteCategory(); as delCat) {
+    <div class="modal-backdrop" (click)="store.cancelDelete()">
+      <div
+        class="modal-card modal-card--danger"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+      >
+        <header class="modal-card__header modal-card__header--danger">
+          <div class="danger-title-row">
+            <app-icon name="alert-triangle" [size]="22" class="text-danger" />
+            <h2 class="modal-card__title">Delete Category?</h2>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.cancelDelete()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <div class="modal-card__body">
+          <p>
+            Are you sure you want to delete category <strong>"{{ delCat.name }}"</strong>?
+          </p>
+          <div class="danger-warning-box">
+            <app-icon name="info" [size]="18" />
+            <p>
+              This action cannot be undone. Products and subcategories assigned to this category will be unassigned.
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" appButton variant="secondary" size="md" (click)="store.cancelDelete()">
+            Cancel
+          </button>
+          <button type="button" appButton variant="danger" size="md" (click)="confirmDeleteCategory()">
+            Yes, Delete Category
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

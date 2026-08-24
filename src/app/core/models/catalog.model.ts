@@ -10,6 +10,8 @@ export interface Category {
   readonly position: number;
   /** Products directly in this category, excluding descendants. */
   readonly productCount: number;
+  readonly imageUrl?: string;
+  readonly status?: 'active' | 'inactive';
 }
 
 /** A category with its children resolved, as returned by the tree endpoint. */
