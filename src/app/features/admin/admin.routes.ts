@@ -51,6 +51,13 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/admin-users/admin-users').then((m) => m.AdminUsers),
       },
+      {
+        path: 'inventory',
+        title: 'Inventory & Warehouse',
+        data: { breadcrumb: 'Inventory' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./pages/admin-inventory/admin-inventory').then((m) => m.AdminInventory),
+      },
     ],
   },
 ];

@@ -1,0 +1,338 @@
+<div class="admin-inventory">
+  <!-- PAGE HEADER -->
+  <header class="inventory-header">
+    <div class="inventory-header__title-group">
+      <h1 class="inventory-header__title">Inventory & Warehouse Management</h1>
+      <p class="inventory-header__subtitle">
+        Monitor SKU stock levels, configure low-stock reorder thresholds, perform adjustments, and track movement history.
+      </p>
+    </div>
+  </header>
+
+  <!-- KPI SUMMARY CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-card__icon-wrapper">
+        <app-icon name="inbox" [size]="20" />
+      </div>
+      <div class="kpi-card__info">
+        <span class="kpi-label">Total Catalog SKUs</span>
+        <strong class="kpi-value">{{ store.totalSkusCount() }}</strong>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--warning">
+      <div class="kpi-card__icon-wrapper">
+        <app-icon name="alert-triangle" [size]="20" />
+      </div>
+      <div class="kpi-card__info">
+        <span class="kpi-label">Low Stock Alerts</span>
+        <strong class="kpi-value">{{ store.lowStockCount() }}</strong>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-card--danger">
+      <div class="kpi-card__icon-wrapper">
+        <app-icon name="close" [size]="20" />
+      </div>
+      <div class="kpi-card__info">
+        <span class="kpi-label">Out of Stock SKUs</span>
+        <strong class="kpi-value">{{ store.outOfStockCount() }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH & STATUS FILTER BAR -->
+  <div class="inventory-controls">
+    <div class="inventory-controls__search">
+      <app-icon name="search" [size]="18" class="search-icon" />
+      <input
+        type="search"
+        [value]="store.searchQuery()"
+        (input)="store.setSearchQuery($any($event.target).value)"
+        placeholder="Search inventory by SKU, product name, or warehouse..."
+        class="search-input"
+      />
+      @if (store.searchQuery()) {
+        <button
+          type="button"
+          class="search-clear-btn"
+          (click)="store.setSearchQuery('')"
+          aria-label="Clear search"
+        >
+          <app-icon name="close" [size]="14" />
+        </button>
+      }
+    </div>
+
+    <!-- STATUS FILTER TABS -->
+    <nav class="status-pills-bar" aria-label="Stock Status Filter">
+      @for (st of ['all', 'in-stock', 'low-stock', 'out-of-stock']; track st) {
+        <button
+          type="button"
+          class="status-pill"
+          [class.status-pill--active]="store.statusFilter() === st"
+          (click)="store.setStatusFilter($any(st))"
+        >
+          {{ st === 'all' ? 'All Items' : (st === 'in-stock' ? 'In Stock' : (st === 'low-stock' ? 'Low Stock' : 'Out of Stock')) }}
+        </button>
+      }
+    </nav>
+  </div>
+
+  <!-- INVENTORY DATA TABLE -->
+  @if (store.paginatedData().items.length === 0) {
+    <div class="inventory-empty">
+      <app-empty-state
+        [heading]="'No inventory records found'"
+        [description]="'No SKUs match your search query or selected stock status filter.'"
+      />
+    </div>
+  } @else {
+    <div class="inventory-table-card">
+      <div class="table-container">
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product Name</th>
+              <th>On Hand</th>
+              <th>Reserved</th>
+              <th>Available Stock</th>
+              <th>Reorder Threshold</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rec of store.paginatedData().items; track rec.productId) {
+              <tr>
+                <td>
+                  <code class="sku-tag">{{ rec.sku }}</code>
+                </td>
+                <td>
+                  <strong class="product-name">{{ rec.productName }}</strong>
+                </td>
+                <td>
+                  <span class="qty-num">{{ rec.onHand }}</span>
+                </td>
+                <td>
+                  <span class="qty-num qty-num--muted">{{ rec.reserved }}</span>
+                </td>
+                <td>
+                  <strong class="qty-num qty-num--bold">{{ rec.available }}</strong>
+                </td>
+                <td>
+                  <span class="threshold-tag">≤ {{ rec.reorderLevel }} units</span>
+                </td>
+                <td>
+                  <app-badge [variant]="getStockBadgeVariant(rec.status)" size="sm">
+                    {{ rec.status }}
+                  </app-badge>
+                </td>
+                <td>
+                  <span class="date-cell">{{ rec.updatedAt | date: 'short' }}</span>
+                </td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="openAdjustModal(rec)"
+                      title="Adjust Stock Quantity"
+                    >
+                      <app-icon name="star" [size]="16" />
+                      <span>Adjust</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="store.openHistoryDrawer(rec)"
+                      title="View Movement History Log"
+                    >
+                      <app-icon name="info" [size]="16" />
+                      <span>History</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGINATION BAR -->
+    @if (store.paginatedData().totalPages > 1) {
+      <nav class="inventory-pagination" aria-label="Inventory Pagination">
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === 1"
+          (click)="store.setPage(store.paginatedData().currentPage - 1)"
+        >
+          <app-icon name="chevron-left" [size]="16" />
+          Previous
+        </button>
+
+        <div class="pagination-pages">
+          @for (p of [].constructor(store.paginatedData().totalPages); track $index; let pageNum = $index) {
+            <button
+              type="button"
+              class="pagination-num"
+              [class.pagination-num--active]="store.paginatedData().currentPage === (pageNum + 1)"
+              (click)="store.setPage(pageNum + 1)"
+            >
+              {{ pageNum + 1 }}
+            </button>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === store.paginatedData().totalPages"
+          (click)="store.setPage(store.paginatedData().currentPage + 1)"
+        >
+          Next
+          <app-icon name="chevron-right" [size]="16" />
+        </button>
+      </nav>
+    }
+  }
+
+  <!-- ADJUST STOCK MODAL OVERLAY -->
+  @if (store.adjustingRecord(); as targetRec) {
+    <div class="modal-backdrop" (click)="store.closeModals()">
+      <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header">
+          <div>
+            <h2 class="modal-card__title">Adjust Stock Level</h2>
+            <code class="sku-tag">{{ targetRec.sku }} - {{ targetRec.productName }}</code>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.closeModals()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <form [formGroup]="adjustForm" (ngSubmit)="submitAdjustment()" class="adjust-form">
+          <div class="current-stock-box">
+            <div>
+              <span>Current On Hand:</span>
+              <strong>{{ targetRec.onHand }} units</strong>
+            </div>
+            <div>
+              <span>Available Stock:</span>
+              <strong>{{ targetRec.available }} units</strong>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="adj-type" class="form-label">Adjustment Type *</label>
+            <select id="adj-type" formControlName="adjustmentType" class="form-control">
+              <option value="add">Restock / Intake Add (+)</option>
+              <option value="subtract">Audit Write-Off / Damage Remove (-)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="adj-qty" class="form-label">Quantity Amount *</label>
+            <input
+              id="adj-qty"
+              type="number"
+              formControlName="quantity"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('quantity')"
+            />
+            @if (isControlInvalid('quantity')) {
+              <span class="form-error">Quantity must be at least 1.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="adj-reason" class="form-label">Audit Reason / Note *</label>
+            <input
+              id="adj-reason"
+              type="text"
+              formControlName="reason"
+              class="form-control"
+              [class.form-control--error]="isControlInvalid('reason')"
+              placeholder="e.g. Supplier Shipment intake #402"
+            />
+            @if (isControlInvalid('reason')) {
+              <span class="form-error">Reason note is required (min 4 chars).</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="adj-threshold" class="form-label">Low Stock Reorder Threshold</label>
+            <input
+              id="adj-threshold"
+              type="number"
+              formControlName="reorderLevel"
+              class="form-control"
+            />
+            <span class="form-hint">Items at or below this level trigger Low Stock status.</span>
+          </div>
+
+          <div class="modal-card__footer">
+            <button type="button" appButton variant="secondary" size="md" (click)="store.closeModals()">
+              Cancel
+            </button>
+            <button type="submit" appButton variant="primary" size="md">
+              Submit Adjustment
+              <app-icon name="check" [size]="16" />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- STOCK MOVEMENT HISTORY LOG DRAWER -->
+  @if (store.viewingHistoryRecord(); as historyTarget) {
+    <div class="modal-backdrop" (click)="store.closeModals()">
+      <div class="modal-card modal-card--lg" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header">
+          <div>
+            <h2 class="modal-card__title">Stock Movement Audit History</h2>
+            <code class="sku-tag">{{ historyTarget.sku }} - {{ historyTarget.productName }}</code>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.closeModals()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <div class="history-body">
+          @if (store.selectedProductHistory().length === 0) {
+            <p class="no-history-text">No recorded stock movements for this item yet.</p>
+          } @else {
+            <ol class="history-list">
+              @for (item of store.selectedProductHistory(); track item.id) {
+                <li class="history-item">
+                  <div class="history-item__badge" [class.history-item__badge--add]="item.delta > 0">
+                    {{ item.delta > 0 ? '+' + item.delta : item.delta }}
+                  </div>
+                  <div class="history-item__content">
+                    <div class="history-item__top">
+                      <strong class="reason-text">{{ item.reason }}</strong>
+                      <span class="time-text">{{ item.timestamp | date: 'medium' }}</span>
+                    </div>
+                    <span class="performed-by">Performed by: {{ item.performedBy }} — New On Hand: {{ item.newOnHand }} units</span>
+                  </div>
+                </li>
+              }
+            </ol>
+          }
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" appButton variant="secondary" size="md" (click)="store.closeModals()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

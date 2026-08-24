@@ -36,3 +36,15 @@ export interface InventoryListQuery {
   /** Restrict to records at or below their reorder level. */
   readonly lowStockOnly?: boolean;
 }
+
+export interface StockHistoryItem {
+  readonly id: string;
+  readonly productId: string;
+  readonly sku: string;
+  readonly productName: string;
+  readonly delta: number;
+  readonly reason: string;
+  readonly performedBy: string;
+  readonly timestamp: string;
+  readonly newOnHand: number;
+}
