@@ -1,0 +1,446 @@
+<div class="admin-products">
+  <!-- PAGE HEADER & CONTROLS -->
+  <header class="products-header">
+    <div class="products-header__title-group">
+      <h1 class="products-header__title">Product Management</h1>
+      <p class="products-header__subtitle">
+        Manage catalog items, pricing, inventory stock, images, and technical specifications.
+      </p>
+    </div>
+
+    <div class="products-header__action">
+      <button type="button" appButton variant="primary" size="md" (click)="openAddModal()">
+        <app-icon name="plus" [size]="18" />
+        Add New Product
+      </button>
+    </div>
+  </header>
+
+  <!-- SEARCH & FILTER BAR -->
+  <div class="products-search-bar">
+    <div class="products-search-bar__input-wrapper">
+      <app-icon name="search" [size]="18" class="search-icon" />
+      <input
+        type="search"
+        [value]="store.searchQuery()"
+        (input)="store.setSearchQuery($any($event.target).value)"
+        placeholder="Search products by name, SKU, or category..."
+        class="search-input"
+      />
+      @if (store.searchQuery()) {
+        <button
+          type="button"
+          class="search-clear-btn"
+          (click)="store.setSearchQuery('')"
+          aria-label="Clear search"
+        >
+          <app-icon name="close" [size]="14" />
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- PRODUCT DATA TABLE -->
+  @if (store.paginatedData().items.length === 0) {
+    <div class="products-empty">
+      <app-empty-state
+        [heading]="'No products found'"
+        [description]="'No products match your search query. Try searching for something else or add a new product.'"
+      />
+    </div>
+  } @else {
+    <div class="products-table-card">
+      <div class="table-container">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Product Details</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Pricing</th>
+              <th>Stock Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (prod of store.paginatedData().items; track prod.id) {
+              <tr>
+                <td>
+                  <div class="product-thumb">
+                    <img [src]="prod.thumbnail.url" [alt]="prod.name" />
+                  </div>
+                </td>
+                <td>
+                  <div class="product-info-cell">
+                    <strong class="product-info-cell__name">{{ prod.name }}</strong>
+                    <span class="product-info-cell__summary">{{ prod.summary }}</span>
+                  </div>
+                </td>
+                <td>
+                  <code class="sku-tag">{{ prod.sku }}</code>
+                </td>
+                <td>
+                  <span class="category-chip">{{ prod.categoryId }}</span>
+                </td>
+                <td>
+                  <div class="price-cell">
+                    <span class="price-cell__amount">
+                      {{ prod.price.amountMinor | price: prod.price.currency }}
+                    </span>
+                    @if (prod.price.compareAtMinor) {
+                      <span class="price-cell__compare">
+                        {{ prod.price.compareAtMinor | price: prod.price.currency }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="stock-cell">
+                    <app-badge [variant]="getStockVariant(prod.stock.status)" size="sm">
+                      {{ prod.stock.status }}
+                    </app-badge>
+                    <span class="stock-cell__qty">{{ prod.stock.available }} in stock</span>
+                  </div>
+                </td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="store.openViewModal(prod)"
+                      title="View Details"
+                    >
+                      <app-icon name="info" [size]="16" />
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn"
+                      (click)="openEditModal(prod)"
+                      title="Edit Product"
+                    >
+                      <app-icon name="star" [size]="16" />
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn action-btn--danger"
+                      (click)="deleteProduct(prod)"
+                      title="Delete Product"
+                    >
+                      <app-icon name="close" [size]="16" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGINATION BAR -->
+    @if (store.paginatedData().totalPages > 1) {
+      <nav class="products-pagination" aria-label="Product Catalog Pagination">
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === 1"
+          (click)="store.setPage(store.paginatedData().currentPage - 1)"
+        >
+          <app-icon name="chevron-left" [size]="16" />
+          Previous
+        </button>
+
+        <div class="pagination-pages">
+          @for (p of [].constructor(store.paginatedData().totalPages); track $index; let pageNum = $index) {
+            <button
+              type="button"
+              class="pagination-num"
+              [class.pagination-num--active]="store.paginatedData().currentPage === (pageNum + 1)"
+              (click)="store.setPage(pageNum + 1)"
+            >
+              {{ pageNum + 1 }}
+            </button>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          [disabled]="store.paginatedData().currentPage === store.paginatedData().totalPages"
+          (click)="store.setPage(store.paginatedData().currentPage + 1)"
+        >
+          Next
+          <app-icon name="chevron-right" [size]="16" />
+        </button>
+      </nav>
+    }
+  }
+
+  <!-- ADD / EDIT PRODUCT MODAL OVERLAY -->
+  @if (store.isFormOpen()) {
+    <div class="modal-backdrop" (click)="store.closeModals()">
+      <div
+        class="modal-card modal-card--lg"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+      >
+        <header class="modal-card__header">
+          <h2 class="modal-card__title">
+            {{ store.editingProduct() ? 'Edit Product' : 'Add New Product' }}
+          </h2>
+          <button type="button" class="modal-card__close" (click)="store.closeModals()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="product-form">
+          <div class="form-grid">
+            <!-- Product Name -->
+            <div class="form-group col-span-2">
+              <label for="prod-name" class="form-label">Product Name *</label>
+              <input
+                id="prod-name"
+                type="text"
+                formControlName="name"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('name')"
+                placeholder="e.g. Ergonomic Desk Chair Pro"
+              />
+              @if (isControlInvalid('name')) {
+                <span class="form-error">Product name is required (min 3 chars).</span>
+              }
+            </div>
+
+            <!-- SKU -->
+            <div class="form-group">
+              <label for="prod-sku" class="form-label">SKU *</label>
+              <input
+                id="prod-sku"
+                type="text"
+                formControlName="sku"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('sku')"
+                placeholder="e.g. CHAIR-ERG-01"
+              />
+              @if (isControlInvalid('sku')) {
+                <span class="form-error">Valid alphanumeric SKU required.</span>
+              }
+            </div>
+
+            <!-- Category ID -->
+            <div class="form-group">
+              <label for="prod-cat" class="form-label">Category *</label>
+              <select id="prod-cat" formControlName="categoryId" class="form-control">
+                <option value="cat-1">Furniture & Home</option>
+                <option value="cat-2">Electronics & Workstation</option>
+                <option value="cat-3">Audio & Sound</option>
+                <option value="cat-4">Accessories</option>
+              </select>
+            </div>
+
+            <!-- Regular Price -->
+            <div class="form-group">
+              <label for="prod-price" class="form-label">Regular Price (£) *</label>
+              <input
+                id="prod-price"
+                type="number"
+                step="0.01"
+                formControlName="priceAmount"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('priceAmount')"
+              />
+            </div>
+
+            <!-- Compare At Price (Discount) -->
+            <div class="form-group">
+              <label for="prod-compare" class="form-label">Compare-At Price (£)</label>
+              <input
+                id="prod-compare"
+                type="number"
+                step="0.01"
+                formControlName="compareAtPrice"
+                class="form-control"
+                placeholder="Optional original price for sale badge"
+              />
+            </div>
+
+            <!-- Available Stock -->
+            <div class="form-group">
+              <label for="prod-stock" class="form-label">Stock Quantity *</label>
+              <input
+                id="prod-stock"
+                type="number"
+                formControlName="availableStock"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('availableStock')"
+              />
+            </div>
+
+            <!-- Stock Status -->
+            <div class="form-group">
+              <label for="prod-stock-status" class="form-label">Stock Status *</label>
+              <select id="prod-stock-status" formControlName="stockStatus" class="form-control">
+                <option value="in-stock">In Stock</option>
+                <option value="low-stock">Low Stock</option>
+                <option value="out-of-stock">Out of Stock</option>
+                <option value="preorder">Pre-order</option>
+              </select>
+            </div>
+
+            <!-- Image URL -->
+            <div class="form-group col-span-2">
+              <label for="prod-img" class="form-label">Thumbnail Image URL *</label>
+              <input
+                id="prod-img"
+                type="url"
+                formControlName="imageUrl"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('imageUrl')"
+                placeholder="https://images.unsplash.com/..."
+              />
+              @if (productForm.value.imageUrl) {
+                <div class="image-preview">
+                  <img [src]="productForm.value.imageUrl" alt="Preview" />
+                </div>
+              }
+            </div>
+
+            <!-- Summary -->
+            <div class="form-group col-span-2">
+              <label for="prod-summary" class="form-label">Short Summary *</label>
+              <input
+                id="prod-summary"
+                type="text"
+                formControlName="summary"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('summary')"
+                placeholder="Brief 1-sentence product summary"
+              />
+            </div>
+
+            <!-- Description -->
+            <div class="form-group col-span-2">
+              <label for="prod-desc" class="form-label">Full Description *</label>
+              <textarea
+                id="prod-desc"
+                rows="3"
+                formControlName="description"
+                class="form-control"
+                [class.form-control--error]="isControlInvalid('description')"
+                placeholder="Detailed features, build materials, and warranty information..."
+              ></textarea>
+            </div>
+
+            <!-- DYNAMIC SPECIFICATIONS FORM ARRAY -->
+            <div class="form-group col-span-2">
+              <div class="specs-header">
+                <label class="form-label">Technical Specifications</label>
+                <button
+                  type="button"
+                  class="specs-add-btn"
+                  (click)="addSpecification()"
+                >
+                  + Add Specification
+                </button>
+              </div>
+
+              <div formArrayName="specifications" class="specs-list">
+                @for (specGroup of specificationsArray.controls; track $index; let i = $index) {
+                  <div [formGroupName]="i" class="spec-row">
+                    <input
+                      type="text"
+                      formControlName="label"
+                      placeholder="Label (e.g. Weight Capacity)"
+                      class="form-control"
+                    />
+                    <input
+                      type="text"
+                      formControlName="value"
+                      placeholder="Value (e.g. 150 kg)"
+                      class="form-control"
+                    />
+                    <button
+                      type="button"
+                      class="spec-remove-btn"
+                      (click)="removeSpecification(i)"
+                      aria-label="Remove spec"
+                    >
+                      <app-icon name="close" [size]="16" />
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-card__footer">
+            <button type="button" appButton variant="secondary" size="md" (click)="store.closeModals()">
+              Cancel
+            </button>
+            <button type="submit" appButton variant="primary" size="md">
+              Save Product
+              <app-icon name="check" [size]="16" />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- VIEW PRODUCT DETAILS MODAL -->
+  @if (store.viewingProduct(); as viewProd) {
+    <div class="modal-backdrop" (click)="store.closeModals()">
+      <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <header class="modal-card__header">
+          <div>
+            <h2 class="modal-card__title">{{ viewProd.name }}</h2>
+            <code class="sku-tag">{{ viewProd.sku }}</code>
+          </div>
+          <button type="button" class="modal-card__close" (click)="store.closeModals()">
+            <app-icon name="close" [size]="20" />
+          </button>
+        </header>
+
+        <div class="view-product-body">
+          <div class="view-product-media">
+            <img [src]="viewProd.thumbnail.url" [alt]="viewProd.name" />
+          </div>
+
+          <div class="view-product-details">
+            <div class="view-price">
+              <span class="view-price__amount">
+                {{ viewProd.price.amountMinor | price: viewProd.price.currency }}
+              </span>
+              <app-badge [variant]="getStockVariant(viewProd.stock.status)">
+                {{ viewProd.stock.status }} ({{ viewProd.stock.available }} available)
+              </app-badge>
+            </div>
+
+            <p class="view-summary">{{ viewProd.summary }}</p>
+            <p class="view-description">{{ viewProd.description }}</p>
+
+            <div class="view-specs">
+              <strong>Specifications:</strong>
+              <ul>
+                @for (s of viewProd.specifications; track s.label) {
+                  <li><strong>{{ s.label }}:</strong> {{ s.value }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" appButton variant="secondary" size="md" (click)="store.closeModals()">
+            Close
+          </button>
+          <button type="button" appButton variant="primary" size="md" (click)="openEditModal(viewProd)">
+            Edit Product
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

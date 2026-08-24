@@ -120,6 +120,10 @@ export const routes: Routes = [
             (m) => m.NotificationsPage,
           ),
       },
+      {
+        path: SEGMENTS.admin,
+        loadChildren: () => import('@features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+      },
 
       /* Static content pages linked from the footer. */
       ...INFO_ROUTES,

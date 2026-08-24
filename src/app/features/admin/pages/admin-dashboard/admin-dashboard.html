@@ -1,0 +1,314 @@
+<div class="admin-dashboard">
+  <!-- DASHBOARD TOP HEADER & CONTROLS -->
+  <header class="dashboard-header">
+    <div class="dashboard-header__title-group">
+      <h1 class="dashboard-header__title">Overview Dashboard</h1>
+      <p class="dashboard-header__subtitle">
+        Real-time sales performance, revenue analytics, and order fulfillment highlights.
+      </p>
+    </div>
+
+    <div class="dashboard-header__time-filter">
+      @for (range of ['7d', '30d', '90d', '1y']; track range) {
+        <button
+          type="button"
+          class="time-filter-btn"
+          [class.time-filter-btn--active]="adminStore.activeTimeRange() === range"
+          (click)="setTimeRange(range.toString() === '7d' ? '7d' : range.toString() === '30d' ? '30d' : range.toString() === '90d' ? '90d' : '1y')"
+        >
+          {{ range.toUpperCase() }}
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- KPI METRICS GRID (6 CARDS) -->
+  <section class="kpi-grid" aria-label="Key Performance Metrics">
+    <!-- 1. Total Revenue -->
+    <article class="kpi-card">
+      <div class="kpi-card__header">
+        <span class="kpi-card__label">Total Revenue</span>
+        <div class="kpi-card__icon kpi-card__icon--emerald">
+          <app-icon name="check-circle" [size]="20" />
+        </div>
+      </div>
+      <div class="kpi-card__value">
+        {{ adminStore.totalRevenueMinor() | price: 'GBP' }}
+      </div>
+      <div class="kpi-card__footer">
+        <app-badge variant="success" size="sm">+{{ adminStore.revenueGrowthPct() }}%</app-badge>
+        <span class="kpi-card__comparison">vs last month</span>
+      </div>
+    </article>
+
+    <!-- 2. Total Orders -->
+    <article class="kpi-card">
+      <div class="kpi-card__header">
+        <span class="kpi-card__label">Total Orders</span>
+        <div class="kpi-card__icon kpi-card__icon--blue">
+          <app-icon name="cart" [size]="20" />
+        </div>
+      </div>
+      <div class="kpi-card__value">
+        {{ adminStore.totalOrdersCount() }}
+      </div>
+      <div class="kpi-card__footer">
+        <app-badge variant="brand" size="sm">+{{ adminStore.ordersGrowthPct() }}%</app-badge>
+        <span class="kpi-card__comparison">vs last month</span>
+      </div>
+    </article>
+
+    <!-- 3. Total Customers -->
+    <article class="kpi-card">
+      <div class="kpi-card__header">
+        <span class="kpi-card__label">Total Customers</span>
+        <div class="kpi-card__icon kpi-card__icon--purple">
+          <app-icon name="user" [size]="20" />
+        </div>
+      </div>
+      <div class="kpi-card__value">
+        {{ adminStore.totalCustomersCount() }}
+      </div>
+      <div class="kpi-card__footer">
+        <app-badge variant="success" size="sm">+{{ adminStore.customersGrowthPct() }}%</app-badge>
+        <span class="kpi-card__comparison">vs last month</span>
+      </div>
+    </article>
+
+    <!-- 4. Total Products -->
+    <article class="kpi-card">
+      <div class="kpi-card__header">
+        <span class="kpi-card__label">Active Products</span>
+        <div class="kpi-card__icon kpi-card__icon--amber">
+          <app-icon name="menu" [size]="20" />
+        </div>
+      </div>
+      <div class="kpi-card__value">
+        {{ adminStore.totalProductsCount() }}
+      </div>
+      <div class="kpi-card__footer">
+        <app-badge variant="neutral" size="sm">Catalog active</app-badge>
+      </div>
+    </article>
+
+    <!-- 5. Pending Orders -->
+    <article class="kpi-card">
+      <div class="kpi-card__header">
+        <span class="kpi-card__label">Pending Orders</span>
+        <div class="kpi-card__icon kpi-card__icon--warning">
+          <app-icon name="alert-triangle" [size]="20" />
+        </div>
+      </div>
+      <div class="kpi-card__value">
+        {{ adminStore.pendingOrdersCount() }}
+      </div>
+      <div class="kpi-card__footer">
+        <app-badge variant="warning" size="sm">Requires Action</app-badge>
+      </div>
+    </article>
+
+    <!-- 6. Low-Stock Products -->
+    <article class="kpi-card">
+      <div class="kpi-card__header">
+        <span class="kpi-card__label">Low-Stock Alert</span>
+        <div class="kpi-card__icon kpi-card__icon--danger">
+          <app-icon name="info" [size]="20" />
+        </div>
+      </div>
+      <div class="kpi-card__value">
+        {{ adminStore.lowStockProductsCount() }}
+      </div>
+      <div class="kpi-card__footer">
+        <app-badge variant="danger" size="sm">Restock Soon</app-badge>
+      </div>
+    </article>
+  </section>
+
+  <!-- 4 CHARTS GRID -->
+  <section class="charts-grid" aria-label="Analytics Charts">
+    <!-- CHART 1: Sales Bar Chart -->
+    <div class="chart-card">
+      <header class="chart-card__header">
+        <div>
+          <h2 class="chart-card__title">Sales Volume Trend</h2>
+          <span class="chart-card__subtitle">Daily order volume distribution</span>
+        </div>
+      </header>
+
+      <div class="chart-card__body">
+        <div class="bar-chart-container">
+          @for (d of adminStore.salesChartData(); track d.label) {
+            <div class="bar-col">
+              <div class="bar-col__track">
+                <div
+                  class="bar-col__fill"
+                  [style.height.%]="(d.salesCount / maxSalesCount()) * 100"
+                  [attr.title]="d.label + ': ' + d.salesCount + ' sales'"
+                >
+                  <span class="bar-col__tooltip">{{ d.salesCount }}</span>
+                </div>
+              </div>
+              <span class="bar-col__label">{{ d.label }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART 2: Revenue by Category Progress Breakdown -->
+    <div class="chart-card">
+      <header class="chart-card__header">
+        <div>
+          <h2 class="chart-card__title">Revenue by Category</h2>
+          <span class="chart-card__subtitle">Monetary contribution per catalog category</span>
+        </div>
+      </header>
+
+      <div class="chart-card__body">
+        <div class="category-breakdown-list">
+          @for (cat of adminStore.revenueByCategoryData(); track cat.category) {
+            <div class="cat-row">
+              <div class="cat-row__header">
+                <span class="cat-row__name">{{ cat.category }}</span>
+                <span class="cat-row__val">{{ cat.revenueMinor | price: 'GBP' }} ({{ cat.percentage }}%)</span>
+              </div>
+              <div class="cat-row__track">
+                <div
+                  class="cat-row__fill"
+                  [style.width.%]="cat.percentage"
+                  [style.background-color]="cat.color"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART 3: Order Status Breakdown -->
+    <div class="chart-card">
+      <header class="chart-card__header">
+        <div>
+          <h2 class="chart-card__title">Orders Status Distribution</h2>
+          <span class="chart-card__subtitle">Fulfillment lifecycle breakdown</span>
+        </div>
+      </header>
+
+      <div class="chart-card__body">
+        <div class="status-donut-legend">
+          @for (st of adminStore.orderStatusData(); track st.status) {
+            <div class="legend-chip">
+              <span class="legend-chip__dot" [style.background-color]="st.color"></span>
+              <span class="legend-chip__name">{{ st.status }}</span>
+              <strong class="legend-chip__count">{{ st.count }} ({{ st.percentage }}%)</strong>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART 4: Customer Acquisition Growth Chart -->
+    <div class="chart-card">
+      <header class="chart-card__header">
+        <div>
+          <h2 class="chart-card__title">Customer Acquisition</h2>
+          <span class="chart-card__subtitle">New vs Returning customers monthly trend</span>
+        </div>
+      </header>
+
+      <div class="chart-card__body">
+        <div class="bar-chart-container bar-chart-container--stacked">
+          @for (cg of adminStore.customerGrowthData(); track cg.period) {
+            <div class="bar-col">
+              <div class="bar-col__track">
+                <div
+                  class="bar-col__fill bar-col__fill--brand"
+                  [style.height.%]="(cg.newCustomers / maxCustomerCount()) * 100"
+                  [attr.title]="cg.period + ' New: ' + cg.newCustomers"
+                ></div>
+              </div>
+              <span class="bar-col__label">{{ cg.period }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLES GRID: Recent Orders & Top Selling Products -->
+  <section class="tables-grid" aria-label="Activity Summaries">
+    <!-- Recent Orders Table -->
+    <div class="table-card">
+      <header class="table-card__header">
+        <h2 class="table-card__title">Recent Orders</h2>
+        <a [routerLink]="'/admin/orders'" class="table-card__link">View All Orders →</a>
+      </header>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ord of adminStore.recentOrdersData(); track ord.id) {
+              <tr>
+                <td><strong>{{ ord.id }}</strong></td>
+                <td>{{ ord.customerName }}</td>
+                <td>{{ ord.date | date: 'shortDate' }}</td>
+                <td>{{ ord.totalMinor | price: 'GBP' }}</td>
+                <td>
+                  <app-badge [variant]="getOrderStatusVariant(ord.status)" size="sm">
+                    {{ ord.status }}
+                  </app-badge>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Top Selling Products Table -->
+    <div class="table-card">
+      <header class="table-card__header">
+        <h2 class="table-card__title">Top Selling Products</h2>
+        <a [routerLink]="'/admin/products'" class="table-card__link">View Product Catalog →</a>
+      </header>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Units Sold</th>
+              <th>Revenue</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (prod of adminStore.topProductsData(); track prod.id) {
+              <tr>
+                <td><strong>{{ prod.name }}</strong></td>
+                <td>{{ prod.category }}</td>
+                <td>{{ prod.unitsSold }}</td>
+                <td>{{ prod.revenueMinor | price: 'GBP' }}</td>
+                <td>
+                  <app-badge [variant]="prod.stock <= 5 ? 'danger' : 'success'" size="sm">
+                    {{ prod.stock }} left
+                  </app-badge>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
