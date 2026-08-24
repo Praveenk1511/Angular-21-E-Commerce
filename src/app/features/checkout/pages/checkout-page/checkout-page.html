@@ -1,0 +1,718 @@
+<app-page-container>
+  <div class="checkout-page">
+    <header class="checkout-page__header">
+      <h1 class="checkout-page__title">Checkout</h1>
+      <a [routerLink]="cartUrl" class="checkout-page__back-link">
+        <app-icon name="chevron-left" [size]="16" />
+        Return to Cart
+      </a>
+    </header>
+
+    @if (paymentStore.lastResult(); as result) {
+      <!-- ORDER CONFIRMATION / SUCCESS STATE -->
+      <div class="checkout-page__success-state">
+        <div class="success-card">
+          <div class="success-card__icon">
+            <app-icon name="check-circle" [size]="48" />
+          </div>
+          <h2 class="success-card__title">Order Placed Successfully!</h2>
+          <p class="success-card__subtitle">
+            Thank you for your purchase. Your order has been placed and is currently being processed.
+          </p>
+
+          <div class="success-card__details">
+            <div class="success-detail-row">
+              <span class="success-detail-row__label">Order Reference:</span>
+              <strong class="success-detail-row__value">{{ result.orderReference }}</strong>
+            </div>
+            <div class="success-detail-row">
+              <span class="success-detail-row__label">Transaction ID:</span>
+              <span class="success-detail-row__value">{{ result.transactionId }}</span>
+            </div>
+            <div class="success-detail-row">
+              <span class="success-detail-row__label">Payment Method:</span>
+              <span class="success-detail-row__value text-capitalize">{{ result.paymentMethod }}</span>
+            </div>
+            <div class="success-detail-row">
+              <span class="success-detail-row__label">Amount Paid:</span>
+              <strong class="success-detail-row__value">{{ result.totalMinor | price: 'GBP' }}</strong>
+            </div>
+          </div>
+
+          <div class="success-card__actions">
+            <a [routerLink]="productsUrl" appButton variant="primary" size="lg">
+              Continue Shopping
+              <app-icon name="chevron-right" [size]="18" />
+            </a>
+          </div>
+        </div>
+      </div>
+    } @else if (cartStore.isEmpty()) {
+      <div class="checkout-page__empty-state">
+        <app-empty-state
+          [heading]="'Your cart is empty'"
+          [description]="'You must add items to your cart before proceeding to checkout.'"
+        />
+        <div class="checkout-page__empty-action">
+          <a [routerLink]="productsUrl" appButton variant="primary" size="lg">
+            Shop Products
+            <app-icon name="chevron-right" [size]="18" />
+          </a>
+        </div>
+      </div>
+    } @else {
+      <!-- Multi-step Progress Stepper -->
+      <nav class="checkout-stepper" aria-label="Checkout Progress">
+        <ol class="checkout-stepper__list">
+          <!-- Step 1: Address -->
+          <li
+            class="checkout-stepper__item"
+            [class.checkout-stepper__item--active]="checkoutStore.activeStep() === 1"
+            [class.checkout-stepper__item--completed]="checkoutStore.activeStep() > 1"
+            (click)="checkoutStore.setStep(1)"
+          >
+            <div class="checkout-stepper__circle">
+              @if (checkoutStore.activeStep() > 1) {
+                <app-icon name="check-circle" [size]="18" />
+              } @else {
+                1
+              }
+            </div>
+            <span class="checkout-stepper__label">Shipping Address</span>
+          </li>
+
+          <li class="checkout-stepper__divider"></li>
+
+          <!-- Step 2: Delivery Option -->
+          <li
+            class="checkout-stepper__item"
+            [class.checkout-stepper__item--active]="checkoutStore.activeStep() === 2"
+            [class.checkout-stepper__item--completed]="checkoutStore.activeStep() > 2"
+            (click)="checkoutStore.setStep(2)"
+          >
+            <div class="checkout-stepper__circle">
+              @if (checkoutStore.activeStep() > 2) {
+                <app-icon name="check-circle" [size]="18" />
+              } @else {
+                2
+              }
+            </div>
+            <span class="checkout-stepper__label">Delivery Options</span>
+          </li>
+
+          <li class="checkout-stepper__divider"></li>
+
+          <!-- Step 3: Payment & Review -->
+          <li
+            class="checkout-stepper__item"
+            [class.checkout-stepper__item--active]="checkoutStore.activeStep() === 3"
+            (click)="checkoutStore.setStep(3)"
+          >
+            <div class="checkout-stepper__circle">3</div>
+            <span class="checkout-stepper__label">Payment & Review</span>
+          </li>
+        </ol>
+      </nav>
+
+      <div class="checkout-page__layout">
+        <main class="checkout-step-content">
+          <!-- STEP 1: ADDRESS SELECTION -->
+          @if (checkoutStore.activeStep() === 1) {
+            <section class="checkout-section">
+              <div class="checkout-step-header">
+                <div class="checkout-step-header__title-row">
+                  <h2 class="checkout-step-header__title">Step 1: Select Delivery Address</h2>
+                  <button
+                    type="button"
+                    appButton
+                    variant="secondary"
+                    size="sm"
+                    (click)="addressStore.openAddForm()"
+                  >
+                    <app-icon name="close" [size]="16" style="transform: rotate(45deg)" />
+                    Add New Address
+                  </button>
+                </div>
+                <p class="checkout-step-header__subtitle">
+                  Choose a saved delivery address or add a new shipping destination.
+                </p>
+              </div>
+
+              <!-- Saved Addresses Grid -->
+              <div class="address-grid" role="radiogroup" aria-label="Select Shipping Address">
+                @for (addr of addressStore.savedAddresses(); track addr.id) {
+                  <article
+                    class="address-card"
+                    [class.address-card--selected]="addressStore.selectedAddressId() === addr.id"
+                    (click)="selectAddress(addr.id)"
+                    role="radio"
+                    [attr.aria-checked]="addressStore.selectedAddressId() === addr.id"
+                    tabindex="0"
+                    (keydown.space)="selectAddress(addr.id)"
+                    (keydown.enter)="selectAddress(addr.id)"
+                  >
+                    <div class="address-card__header">
+                      <div class="address-card__radio-wrapper">
+                        <input
+                          type="radio"
+                          name="shippingAddress"
+                          [checked]="addressStore.selectedAddressId() === addr.id"
+                          class="address-card__radio"
+                          tabindex="-1"
+                        />
+                        <span class="address-card__label">{{ addr.label }}</span>
+                      </div>
+
+                      @if (addr.isDefault) {
+                        <app-badge variant="brand" size="sm">Default</app-badge>
+                      }
+                    </div>
+
+                    <div class="address-card__body">
+                      <span class="address-card__recipient">{{ addr.recipient }}</span>
+                      <span class="address-card__line">{{ addr.line1 }}</span>
+                      @if (addr.line2) {
+                        <span class="address-card__line">{{ addr.line2 }}</span>
+                      }
+                      <span class="address-card__line">
+                        {{ addr.city }}, {{ addr.region }} — {{ addr.postcode }}
+                      </span>
+                      @if (addr.phone) {
+                        <span class="address-card__phone">Phone: {{ addr.phone }}</span>
+                      }
+                    </div>
+
+                    <div class="address-card__actions">
+                      <button
+                        type="button"
+                        class="address-card__action-btn"
+                        (click)="$event.stopPropagation(); addressStore.openEditForm(addr.id)"
+                      >
+                        Edit
+                      </button>
+
+                      @if (!addr.isDefault) {
+                        <button
+                          type="button"
+                          class="address-card__action-btn"
+                          (click)="setDefaultAddress($event, addr.id, addr.label)"
+                        >
+                          Set as Default
+                        </button>
+
+                        <button
+                          type="button"
+                          class="address-card__action-btn address-card__action-btn--danger"
+                          (click)="deleteAddress($event, addr.id, addr.label)"
+                        >
+                          Delete
+                        </button>
+                      }
+                    </div>
+                  </article>
+                }
+
+                <button
+                  type="button"
+                  class="address-card address-card--add-new"
+                  (click)="addressStore.openAddForm()"
+                >
+                  <div class="address-card__add-content">
+                    <app-icon name="close" [size]="28" style="transform: rotate(45deg)" />
+                    <span class="address-card__add-text">Add New Delivery Address</span>
+                  </div>
+                </button>
+              </div>
+
+              <div class="checkout-step-footer">
+                <button
+                  type="button"
+                  appButton
+                  variant="primary"
+                  size="lg"
+                  [disabled]="!addressStore.selectedAddress()"
+                  (click)="confirmAddressAndProceed()"
+                >
+                  Deliver to This Address
+                  <app-icon name="chevron-right" [size]="18" />
+                </button>
+              </div>
+            </section>
+          }
+
+          <!-- STEP 2: DELIVERY SELECTION -->
+          @if (checkoutStore.activeStep() === 2) {
+            @if (addressStore.selectedAddress(); as selectedAddr) {
+              <div class="checkout-summary-card">
+                <div class="checkout-summary-card__header">
+                  <div class="checkout-summary-card__title">
+                    <app-icon name="check-circle" [size]="20" class="text-success" />
+                    <span>Delivering to <strong>{{ selectedAddr.recipient }}</strong> ({{ selectedAddr.label }})</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="checkout-summary-card__change-btn"
+                    (click)="checkoutStore.setStep(1)"
+                  >
+                    Change Address
+                  </button>
+                </div>
+                <div class="checkout-summary-card__body">
+                  {{ selectedAddr.line1 }}, {{ selectedAddr.city }}, {{ selectedAddr.region }} — {{ selectedAddr.postcode }}
+                </div>
+              </div>
+            }
+
+            <section class="checkout-section">
+              <div class="checkout-step-header">
+                <h2 class="checkout-step-header__title">Step 2: Choose Delivery Method</h2>
+                <p class="checkout-step-header__subtitle">
+                  Select your preferred shipping speed and delivery schedule.
+                </p>
+              </div>
+
+              <div class="delivery-grid" role="radiogroup" aria-label="Select Delivery Method">
+                @for (opt of checkoutStore.deliveryOptions(); track opt.id) {
+                  <article
+                    class="delivery-card"
+                    [class.delivery-card--selected]="checkoutStore.selectedDeliveryId() === opt.id"
+                    (click)="selectDelivery(opt.id)"
+                    role="radio"
+                    [attr.aria-checked]="checkoutStore.selectedDeliveryId() === opt.id"
+                    tabindex="0"
+                    (keydown.space)="selectDelivery(opt.id)"
+                    (keydown.enter)="selectDelivery(opt.id)"
+                  >
+                    <div class="delivery-card__header">
+                      <div class="delivery-card__radio-wrapper">
+                        <input
+                          type="radio"
+                          name="deliveryOption"
+                          [checked]="checkoutStore.selectedDeliveryId() === opt.id"
+                          class="delivery-card__radio"
+                          tabindex="-1"
+                        />
+                        <span class="delivery-card__name">{{ opt.name }}</span>
+                      </div>
+
+                      <div class="delivery-card__price-tag">
+                        @if (opt.priceMinor === 0) {
+                          <span class="delivery-card__free-badge">FREE</span>
+                        } @else {
+                          <span class="delivery-card__price">{{ opt.priceMinor | price: 'GBP' }}</span>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="delivery-card__body">
+                      <div class="delivery-card__eta">
+                        <app-icon name="info" [size]="16" />
+                        <span>Estimated Delivery: <strong>{{ opt.estimatedDelivery }}</strong></span>
+                      </div>
+                      <p class="delivery-card__desc">{{ opt.description }}</p>
+                    </div>
+                  </article>
+                }
+              </div>
+
+              <div class="checkout-step-footer checkout-step-footer--between">
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  size="lg"
+                  (click)="checkoutStore.setStep(1)"
+                >
+                  <app-icon name="chevron-left" [size]="18" />
+                  Back to Address
+                </button>
+
+                <button
+                  type="button"
+                  appButton
+                  variant="primary"
+                  size="lg"
+                  (click)="confirmDeliveryAndProceed()"
+                >
+                  Continue to Payment
+                  <app-icon name="chevron-right" [size]="18" />
+                </button>
+              </div>
+            </section>
+          }
+
+          <!-- STEP 3: PAYMENT METHOD & REVIEW -->
+          @if (checkoutStore.activeStep() === 3) {
+            <!-- Collapsed Summaries -->
+            <div class="checkout-summary-stack">
+              @if (addressStore.selectedAddress(); as selectedAddr) {
+                <div class="checkout-summary-card">
+                  <div class="checkout-summary-card__header">
+                    <div class="checkout-summary-card__title">
+                      <app-icon name="check-circle" [size]="18" class="text-success" />
+                      <span>Shipping to: <strong>{{ selectedAddr.recipient }}</strong> ({{ selectedAddr.label }})</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="checkout-summary-card__change-btn"
+                      (click)="checkoutStore.setStep(1)"
+                    >
+                      Change Address
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <div class="checkout-summary-card">
+                <div class="checkout-summary-card__header">
+                  <div class="checkout-summary-card__title">
+                    <app-icon name="check-circle" [size]="18" class="text-success" />
+                    <span>Delivery: <strong>{{ checkoutStore.selectedDelivery().name }}</strong> ({{ checkoutStore.selectedDelivery().estimatedDelivery }})</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="checkout-summary-card__change-btn"
+                    (click)="checkoutStore.setStep(2)"
+                  >
+                    Change Method
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <section class="checkout-section">
+              <div class="checkout-step-header">
+                <h2 class="checkout-step-header__title">Step 3: Select Payment Method</h2>
+                <p class="checkout-step-header__subtitle">
+                  Choose how you would like to pay for your order.
+                </p>
+              </div>
+
+              <!-- Payment Error Alert Banner -->
+              @if (paymentStore.paymentError(); as err) {
+                <div class="payment-error-banner" role="alert">
+                  <app-icon name="alert-triangle" [size]="20" />
+                  <div class="payment-error-banner__content">
+                    <strong>Payment Failed</strong>
+                    <p>{{ err }}</p>
+                  </div>
+                  <button type="button" class="btn-retry" (click)="retryPayment()">Retry</button>
+                </div>
+              }
+
+              <!-- Demo Test Mode Info Banner -->
+              <div class="demo-payment-info">
+                <app-icon name="info" [size]="18" />
+                <span>
+                  <strong>Demo Mode:</strong> All transactions are simulated safely.
+                  To test failure triggers, enter VPA containing <code>fail</code> (e.g. <code>fail@upi</code>) or card ending in <code>0000</code>.
+                </span>
+              </div>
+
+              <!-- Payment Method Tabs / Selector -->
+              <div class="payment-tabs" role="tablist">
+                @for (method of paymentStore.paymentMethods; track method.id) {
+                  <button
+                    type="button"
+                    class="payment-tab"
+                    [class.payment-tab--active]="paymentStore.selectedMethod() === method.id"
+                    (click)="selectPaymentMethod(method.id)"
+                    role="tab"
+                    [attr.aria-selected]="paymentStore.selectedMethod() === method.id"
+                  >
+                    <app-icon [name]="method.iconName" [size]="18" />
+                    <span class="payment-tab__title">{{ method.title }}</span>
+                    @if (method.badge) {
+                      <app-badge variant="brand" size="sm">{{ method.badge }}</app-badge>
+                    }
+                  </button>
+                }
+              </div>
+
+              <!-- Selected Payment Method Form -->
+              <div class="payment-form-wrapper">
+                @switch (paymentStore.selectedMethod()) {
+                  @case ('upi') {
+                    <form [formGroup]="upiForm" class="payment-form">
+                      <h3 class="payment-form__title">Pay via UPI</h3>
+                      <div class="form-group">
+                        <label for="upi-vpa" class="form-label">Virtual Payment Address (VPA / UPI ID) *</label>
+                        <input
+                          id="upi-vpa"
+                          type="text"
+                          formControlName="vpa"
+                          class="form-control"
+                          [class.form-control--error]="isControlInvalid(upiForm, 'vpa')"
+                          placeholder="username@bank (e.g. alex@okaxis)"
+                        />
+                        @if (isControlInvalid(upiForm, 'vpa')) {
+                          <span class="form-error">Please enter a valid UPI ID (e.g. user@upi).</span>
+                        }
+                      </div>
+                      <p class="payment-form__hint">
+                        You will receive a payment request on your UPI app (Google Pay, PhonePe, Paytm).
+                      </p>
+                    </form>
+                  }
+
+                  @case ('credit-card') {
+                    <form [formGroup]="cardForm" class="payment-form">
+                      <h3 class="payment-form__title">Pay with Credit Card</h3>
+                      <div class="form-group">
+                        <label for="cc-name" class="form-label">Cardholder Name *</label>
+                        <input
+                          id="cc-name"
+                          type="text"
+                          formControlName="cardholderName"
+                          class="form-control"
+                          [class.form-control--error]="isControlInvalid(cardForm, 'cardholderName')"
+                          placeholder="Name as printed on card"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="cc-number" class="form-label">Card Number *</label>
+                        <input
+                          id="cc-number"
+                          type="text"
+                          formControlName="cardNumber"
+                          class="form-control"
+                          [class.form-control--error]="isControlInvalid(cardForm, 'cardNumber')"
+                          placeholder="1234 5678 9101 1121"
+                        />
+                        @if (isControlInvalid(cardForm, 'cardNumber')) {
+                          <span class="form-error">Please enter a valid 16-digit card number.</span>
+                        }
+                      </div>
+
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label for="cc-expiry" class="form-label">Expiry Date *</label>
+                          <input
+                            id="cc-expiry"
+                            type="text"
+                            formControlName="expiry"
+                            class="form-control"
+                            [class.form-control--error]="isControlInvalid(cardForm, 'expiry')"
+                            placeholder="MM/YY"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label for="cc-cvv" class="form-label">CVV / CVC *</label>
+                          <input
+                            id="cc-cvv"
+                            type="password"
+                            maxLength="4"
+                            formControlName="cvv"
+                            class="form-control"
+                            [class.form-control--error]="isControlInvalid(cardForm, 'cvv')"
+                            placeholder="3-digit CVV"
+                          />
+                        </div>
+                      </div>
+                    </form>
+                  }
+
+                  @case ('debit-card') {
+                    <form [formGroup]="cardForm" class="payment-form">
+                      <h3 class="payment-form__title">Pay with Debit Card</h3>
+                      <div class="form-group">
+                        <label for="dc-name" class="form-label">Cardholder Name *</label>
+                        <input
+                          id="dc-name"
+                          type="text"
+                          formControlName="cardholderName"
+                          class="form-control"
+                          [class.form-control--error]="isControlInvalid(cardForm, 'cardholderName')"
+                          placeholder="Name as printed on card"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="dc-number" class="form-label">Card Number *</label>
+                        <input
+                          id="dc-number"
+                          type="text"
+                          formControlName="cardNumber"
+                          class="form-control"
+                          [class.form-control--error]="isControlInvalid(cardForm, 'cardNumber')"
+                          placeholder="1234 5678 9101 1121"
+                        />
+                      </div>
+
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label for="dc-expiry" class="form-label">Expiry Date *</label>
+                          <input
+                            id="dc-expiry"
+                            type="text"
+                            formControlName="expiry"
+                            class="form-control"
+                            placeholder="MM/YY"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label for="dc-cvv" class="form-label">CVV *</label>
+                          <input
+                            id="dc-cvv"
+                            type="password"
+                            maxLength="4"
+                            formControlName="cvv"
+                            class="form-control"
+                            placeholder="3-digit CVV"
+                          />
+                        </div>
+                      </div>
+                    </form>
+                  }
+
+                  @case ('net-banking') {
+                    <form [formGroup]="netBankingForm" class="payment-form">
+                      <h3 class="payment-form__title">Select Your Bank</h3>
+
+                      <div class="bank-grid">
+                        @for (bank of popularBanks; track bank.code) {
+                          <label
+                            class="bank-chip"
+                            [class.bank-chip--selected]="netBankingForm.value.bankCode === bank.code"
+                          >
+                            <input
+                              type="radio"
+                              formControlName="bankCode"
+                              [value]="bank.code"
+                              class="bank-chip__radio"
+                            />
+                            <span>{{ bank.name }}</span>
+                          </label>
+                        }
+                      </div>
+                    </form>
+                  }
+
+                  @case ('cod') {
+                    <form [formGroup]="codForm" class="payment-form">
+                      <h3 class="payment-form__title">Cash on Delivery</h3>
+                      <p class="payment-form__desc">
+                        Pay cash or card to our delivery executive when your package arrives.
+                      </p>
+                      <label class="checkbox-label">
+                        <input type="checkbox" formControlName="confirmed" class="checkbox-input" />
+                        <span>I confirm I will be available to make payment upon delivery.</span>
+                      </label>
+                    </form>
+                  }
+                }
+              </div>
+
+              <!-- Step 3 Footer Action -->
+              <div class="checkout-step-footer checkout-step-footer--between">
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  size="lg"
+                  [disabled]="paymentStore.isProcessing()"
+                  (click)="checkoutStore.setStep(2)"
+                >
+                  <app-icon name="chevron-left" [size]="18" />
+                  Back to Delivery
+                </button>
+
+                <button
+                  type="button"
+                  appButton
+                  variant="primary"
+                  size="lg"
+                  [disabled]="paymentStore.isProcessing()"
+                  (click)="submitPayment()"
+                >
+                  @if (paymentStore.isProcessing()) {
+                    <app-spinner [size]="20" [label]="'Processing Payment...'" />
+                    <span>Processing Payment...</span>
+                  } @else {
+                    <span>Pay {{ checkoutStore.checkoutTotalMinor() | price: 'GBP' }}</span>
+                    <app-icon name="check-circle" [size]="18" />
+                  }
+                </button>
+              </div>
+            </section>
+          }
+        </main>
+
+        <!-- Right Side Order Summary -->
+        <aside class="checkout-order-summary" aria-label="Order Summary">
+          <h2 class="checkout-order-summary__title">Order Summary</h2>
+
+          <!-- Mini Item Thumbnails -->
+          <div class="checkout-order-summary__items">
+            @for (item of cartStore.cartItems(); track item.productId) {
+              <div class="checkout-mini-item">
+                <div class="checkout-mini-item__thumb">
+                  @if (item.thumbnail && item.thumbnail.url) {
+                    <img [src]="item.thumbnail.url" [alt]="item.name" />
+                  } @else {
+                    <span>{{ item.name[0] }}</span>
+                  }
+                  <span class="checkout-mini-item__badge">{{ item.quantity }}</span>
+                </div>
+                <div class="checkout-mini-item__info">
+                  <span class="checkout-mini-item__name">{{ item.name }}</span>
+                  <span class="checkout-mini-item__price">
+                    {{ item.price.amountMinor * item.quantity | price: item.price.currency }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="checkout-order-summary__rows">
+            <div class="checkout-order-summary__row">
+              <span>Subtotal</span>
+              <span>{{ cartStore.subtotalMinor() | price: 'GBP' }}</span>
+            </div>
+
+            @if (cartStore.discountMinor() > 0) {
+              <div class="checkout-order-summary__row checkout-order-summary__row--success">
+                <span>Savings</span>
+                <span>-{{ cartStore.discountMinor() | price: 'GBP' }}</span>
+              </div>
+            }
+
+            <div class="checkout-order-summary__row">
+              <span>Shipping ({{ checkoutStore.selectedDelivery().name }})</span>
+              <span>
+                @if (checkoutStore.deliveryPriceMinor() === 0) {
+                  <strong class="text-success">FREE</strong>
+                } @else {
+                  {{ checkoutStore.deliveryPriceMinor() | price: 'GBP' }}
+                }
+              </span>
+            </div>
+
+            <div class="checkout-order-summary__row">
+              <span>Estimated Tax (20% VAT)</span>
+              <span>{{ cartStore.taxMinor() | price: 'GBP' }}</span>
+            </div>
+
+            <div class="checkout-order-summary__divider"></div>
+
+            <div class="checkout-order-summary__row checkout-order-summary__row--total">
+              <span>Grand Total</span>
+              <span>{{ checkoutStore.checkoutTotalMinor() | price: 'GBP' }}</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    }
+  </div>
+
+  <!-- Modal Reactive Address Form -->
+  @if (addressStore.isFormOpen()) {
+    <app-address-form
+      [mode]="addressStore.formMode()"
+      [initialAddress]="addressStore.editingAddress()"
+      (cancel)="addressStore.closeForm()"
+      (saved)="addressStore.closeForm()"
+    />
+  }
+</app-page-container>

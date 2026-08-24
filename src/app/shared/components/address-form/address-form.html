@@ -1,0 +1,159 @@
+<div class="address-form-modal">
+  <div class="address-form-modal__backdrop" (click)="onCancel()"></div>
+
+  <div class="address-form-modal__content" role="dialog" aria-modal="true" aria-labelledby="address-form-title">
+    <header class="address-form-modal__header">
+      <h2 id="address-form-title" class="address-form-modal__title">
+        {{ mode() === 'edit' ? 'Edit Delivery Address' : 'Add New Delivery Address' }}
+      </h2>
+      <button type="button" class="address-form-modal__close-btn" (click)="onCancel()" aria-label="Close modal">
+        <app-icon name="close" [size]="20" />
+      </button>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="address-form" novalidate>
+      <div class="address-form__grid">
+        <!-- Label / Nickname -->
+        <div class="form-group">
+          <label for="addr-label" class="form-label">Address Nickname *</label>
+          <input
+            id="addr-label"
+            type="text"
+            formControlName="label"
+            class="form-control"
+            [class.form-control--error]="isInvalid('label')"
+            placeholder="e.g. Home, Office, Cottage"
+          />
+          @if (isInvalid('label')) {
+            <span class="form-error">Address nickname is required.</span>
+          }
+        </div>
+
+        <!-- Recipient Name -->
+        <div class="form-group">
+          <label for="addr-recipient" class="form-label">Full Name *</label>
+          <input
+            id="addr-recipient"
+            type="text"
+            formControlName="recipient"
+            class="form-control"
+            [class.form-control--error]="isInvalid('recipient')"
+            placeholder="Recipient's full name"
+          />
+          @if (isInvalid('recipient')) {
+            <span class="form-error">Full name is required (min 2 characters).</span>
+          }
+        </div>
+
+        <!-- Phone Number -->
+        <div class="form-group">
+          <label for="addr-phone" class="form-label">Phone Number *</label>
+          <input
+            id="addr-phone"
+            type="tel"
+            formControlName="phone"
+            class="form-control"
+            [class.form-control--error]="isInvalid('phone')"
+            placeholder="e.g. +44 7911 123456"
+          />
+          @if (isInvalid('phone')) {
+            <span class="form-error">Valid phone number is required (min 10 digits).</span>
+          }
+        </div>
+
+        <!-- Street Address Line 1 -->
+        <div class="form-group form-group--full">
+          <label for="addr-line1" class="form-label">Street Address *</label>
+          <input
+            id="addr-line1"
+            type="text"
+            formControlName="line1"
+            class="form-control"
+            [class.form-control--error]="isInvalid('line1')"
+            placeholder="House number and street name"
+          />
+          @if (isInvalid('line1')) {
+            <span class="form-error">Street address is required.</span>
+          }
+        </div>
+
+        <!-- Street Address Line 2 -->
+        <div class="form-group form-group--full">
+          <label for="addr-line2" class="form-label">Apartment, suite, unit (optional)</label>
+          <input
+            id="addr-line2"
+            type="text"
+            formControlName="line2"
+            class="form-control"
+            placeholder="Apt, Suite, Building, Floor"
+          />
+        </div>
+
+        <!-- City -->
+        <div class="form-group">
+          <label for="addr-city" class="form-label">City *</label>
+          <input
+            id="addr-city"
+            type="text"
+            formControlName="city"
+            class="form-control"
+            [class.form-control--error]="isInvalid('city')"
+            placeholder="City or Town"
+          />
+          @if (isInvalid('city')) {
+            <span class="form-error">City is required.</span>
+          }
+        </div>
+
+        <!-- State / Region -->
+        <div class="form-group">
+          <label for="addr-region" class="form-label">State / Region *</label>
+          <input
+            id="addr-region"
+            type="text"
+            formControlName="region"
+            class="form-control"
+            [class.form-control--error]="isInvalid('region')"
+            placeholder="State or Region"
+          />
+          @if (isInvalid('region')) {
+            <span class="form-error">State/Region is required.</span>
+          }
+        </div>
+
+        <!-- Pincode / Postcode -->
+        <div class="form-group">
+          <label for="addr-postcode" class="form-label">Pincode / Postcode *</label>
+          <input
+            id="addr-postcode"
+            type="text"
+            formControlName="postcode"
+            class="form-control"
+            [class.form-control--error]="isInvalid('postcode')"
+            placeholder="e.g. SW1A 1AA or 90210"
+          />
+          @if (isInvalid('postcode')) {
+            <span class="form-error">Valid pincode/postcode is required.</span>
+          }
+        </div>
+
+        <!-- Default Checkbox -->
+        <div class="form-group form-group--full form-group--checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="isDefault" class="checkbox-input" />
+            <span>Set as default delivery address</span>
+          </label>
+        </div>
+      </div>
+
+      <footer class="address-form-modal__footer">
+        <button type="button" appButton variant="secondary" size="md" (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit" appButton variant="primary" size="md">
+          {{ mode() === 'edit' ? 'Update Address' : 'Save Address' }}
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>

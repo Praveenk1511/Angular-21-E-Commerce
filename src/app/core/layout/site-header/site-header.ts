@@ -10,6 +10,7 @@ import { SiteSearch } from '@core/layout/site-search/site-search';
 import { Icon } from '@shared/components/icon/icon';
 import { AuthStore } from '@state/auth.store';
 import { CartStore } from '@state/cart.store';
+import { WishlistStore } from '@state/wishlist.store';
 
 /**
  * Storefront masthead.
@@ -31,6 +32,7 @@ import { CartStore } from '@state/cart.store';
 export class SiteHeader {
   protected readonly auth = inject(AuthStore);
   protected readonly cart = inject(CartStore);
+  protected readonly wishlist = inject(WishlistStore);
 
   protected readonly navigationItems = PRIMARY_NAVIGATION;
   protected readonly profileUrl = APP_URLS.profile;

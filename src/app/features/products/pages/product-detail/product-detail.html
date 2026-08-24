@@ -198,12 +198,12 @@
               <button
                 type="button"
                 appButton
-                variant="secondary"
+                [variant]="isWishlisted() ? 'primary' : 'secondary'"
                 size="lg"
                 (click)="handleAddToWishlist()"
-                aria-label="Add to wishlist"
+                [attr.aria-label]="isWishlisted() ? 'Remove from wishlist' : 'Add to wishlist'"
               >
-                <app-icon [name]="'heart'" />
+                <app-icon name="heart" />
               </button>
             </div>
           </div>

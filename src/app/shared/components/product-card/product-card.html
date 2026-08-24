@@ -24,6 +24,16 @@
         }
       </div>
     }
+
+    <button
+      type="button"
+      class="product-card__wishlist-btn"
+      [class.product-card__wishlist-btn--active]="isWishlisted()"
+      (click)="toggleWishlist($event)"
+      [attr.aria-label]="isWishlisted() ? 'Remove ' + product().name + ' from wishlist' : 'Save ' + product().name + ' to wishlist'"
+    >
+      <app-icon name="heart" [size]="18" />
+    </button>
   </div>
 
   <div class="product-card__body">

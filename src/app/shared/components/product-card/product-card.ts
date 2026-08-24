@@ -1,11 +1,21 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { APP_URLS } from '@core/config/route-paths';
 import type { ProductBadge, ProductSummary } from '@core/models';
 import { Badge, type BadgeVariant } from '@shared/components/badge/badge';
+import { Icon } from '@shared/components/icon/icon';
 import { Rating } from '@shared/components/rating/rating';
+import { ToastService } from '@shared/components/toast/toast.service';
 import { PricePipe } from '@shared/pipes/price.pipe';
+import { WishlistStore } from '@state/wishlist.store';
 
 const BADGE_MAP: Record<ProductBadge, { label: string; variant: BadgeVariant }> = {
   new: { label: 'New', variant: 'brand' },
@@ -15,20 +25,12 @@ const BADGE_MAP: Record<ProductBadge, { label: string; variant: BadgeVariant }> 
 };
 
 /**
- * Product card for grid listings: thumbnail, name, brand, price, rating
- * and badges.
- *
- * Entirely presentational — it takes a `ProductSummary` as input and renders it. No
- * service calls, no state. Reused by the home page, catalog grid, search results, and
- * anything else that shows a list of products.
- *
- * The whole card is linked via a stretched anchor on the product name, so the entire
- * surface is clickable without wrapping a `div` in an `<a>` (which is invalid HTML for
- * interactive content).
+ * Product card for grid listings: thumbnail, name, brand, price, rating, badges,
+ * and interactive wishlist toggle button.
  */
 @Component({
   selector: 'app-product-card',
-  imports: [RouterLink, Badge, Rating, PricePipe],
+  imports: [RouterLink, Badge, Icon, Rating, PricePipe],
   templateUrl: './product-card.html',
   styleUrl: './product-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,9 +43,16 @@ export class ProductCard {
   readonly brandName = input<string>();
   readonly viewMode = input<'grid' | 'list'>('grid');
 
+  private readonly wishlist = inject(WishlistStore);
+  private readonly toast = inject(ToastService);
+
   protected readonly imageFailed = signal(false);
 
   protected readonly url = computed(() => APP_URLS.productDetail(this.product().slug));
+
+  protected readonly isWishlisted = computed(() =>
+    this.wishlist.isWishlisted(this.product().id),
+  );
 
   protected readonly badges = computed(() =>
     this.product().badges.map((badge) => BADGE_MAP[badge]),
@@ -69,5 +78,21 @@ export class ProductCard {
 
   protected handleImageError(): void {
     this.imageFailed.set(true);
+  }
+
+  protected toggleWishlist(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const res = this.wishlist.toggleWishlist(this.product(), this.brandName());
+    if (res.added) {
+      this.toast.success('Saved to Wishlist', res.message);
+    } else {
+      this.toast.show({
+        variant: 'info',
+        title: 'Wishlist Updated',
+        message: res.message,
+      });
+    }
   }
 }

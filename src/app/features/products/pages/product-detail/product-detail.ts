@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { APP_URLS } from '@core/config/route-paths';
@@ -18,6 +25,7 @@ import { ToastService } from '@shared/components/toast/toast.service';
 import { PricePipe } from '@shared/pipes/price.pipe';
 import { ProductDetailStore } from '@state/product-detail.store';
 import { CartStore } from '@state/cart.store';
+import { WishlistStore } from '@state/wishlist.store';
 
 /**
  * Product Details Page (/products/:id).
@@ -55,8 +63,14 @@ export class ProductDetail {
 
   protected readonly store = inject(ProductDetailStore);
   private readonly cartStore = inject(CartStore);
+  protected readonly wishlistStore = inject(WishlistStore);
   private readonly toast = inject(ToastService);
   protected readonly productsUrl = APP_URLS.products;
+
+  protected readonly isWishlisted = computed(() => {
+    const prod = this.store.product();
+    return prod ? this.wishlistStore.isWishlisted(prod.id) : false;
+  });
 
   constructor() {
     effect(() => {
@@ -89,10 +103,17 @@ export class ProductDetail {
     if (!prod) {
       return;
     }
-    this.toast.show({
-      variant: 'info',
-      title: 'Wishlist Updated',
-      message: `${prod.name} saved to your wishlist.`,
-    });
+    const brandName = this.store.brand()?.name;
+    const result = this.wishlistStore.toggleWishlist(prod, brandName);
+
+    if (result.added) {
+      this.toast.success('Saved to Wishlist', result.message);
+    } else {
+      this.toast.show({
+        variant: 'info',
+        title: 'Wishlist Updated',
+        message: result.message,
+      });
+    }
   }
 }

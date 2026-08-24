@@ -55,6 +55,8 @@
               <app-icon [name]="action.icon" [size]="21" />
               @if (action.id === 'cart' && cart.itemCount() > 0) {
                 <span class="site-header__cart-badge">{{ cart.itemCount() }}</span>
+              } @else if (action.id === 'wishlist' && wishlist.wishlistCount() > 0) {
+                <span class="site-header__cart-badge">{{ wishlist.wishlistCount() }}</span>
               }
             </span>
             <span class="site-header__action-label">{{ action.label }}</span>
