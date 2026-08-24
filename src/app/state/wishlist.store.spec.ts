@@ -13,7 +13,7 @@ describe('WishlistStore', () => {
     brandId: 'b-1',
     categoryId: 'c-2',
     summary: 'Precision mouse',
-    price: { amountMinor: 4999, currency: 'GBP' },
+    price: { amountMinor: 4999, currency: 'INR' },
     thumbnail: { url: '/thumb.png', alt: 'Mouse' },
     rating: { average: 4.8, count: 5, distribution: [0, 0, 0, 1, 4] },
     stock: { status: 'in-stock', available: 20 },

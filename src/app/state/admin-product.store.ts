@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 
-import type { Product, StockStatus } from '@core/models';
+import type { CurrencyCode, Product, StockStatus } from '@core/models';
 
 const ADMIN_CATALOG_KEY = 'lumen_admin_catalog';
 
@@ -14,14 +14,14 @@ const MOCK_INITIAL_CATALOG: readonly Product[] = [
     categoryId: 'cat-1',
     summary: 'Adjustable lumbar support with breathable mesh back and 3D armrests.',
     description: 'Designed for 8+ hour workdays, this chair features dynamic lumbar support, breathable mesh upholstery, dual-wheel smooth casters, and 3D armrests to ensure optimal posture.',
-    price: { currency: 'GBP', amountMinor: 34999, compareAtMinor: 39999 },
+    price: { currency: 'INR', amountMinor: 34999, compareAtMinor: 39999 },
     thumbnail: {
-      url: 'https://images.unsplash.com/photo-1580481072645-022f9a6d8310?auto=format&fit=crop&w=600&q=80',
+      url: '/images/chair.jpg',
       alt: 'Ergonomic Desk Chair Pro',
     },
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1580481072645-022f9a6d8310?auto=format&fit=crop&w=600&q=80',
+        url: '/images/chair.jpg',
         alt: 'Ergonomic Desk Chair Pro Main View',
       },
     ],
@@ -49,7 +49,7 @@ const MOCK_INITIAL_CATALOG: readonly Product[] = [
     categoryId: 'cat-2',
     summary: 'High-precision 8K DPI optical sensor with silent click switches.',
     description: 'Crafted for productivity professionals, this mouse offers fast electromagnetic scrolling, quiet tactile switches, and dual Bluetooth / 2.4GHz wireless connectivity.',
-    price: { currency: 'GBP', amountMinor: 7999, compareAtMinor: 9999 },
+    price: { currency: 'INR', amountMinor: 7999, compareAtMinor: 9999 },
     thumbnail: {
       url: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=600&q=80',
       alt: 'Precision Wireless Mouse',
@@ -84,7 +84,7 @@ const MOCK_INITIAL_CATALOG: readonly Product[] = [
     categoryId: 'cat-3',
     summary: 'Adaptive hybrid ANC with 40mm drivers and 30-hour playback.',
     description: 'Immerse yourself in high-fidelity audio with active noise cancellation, custom EQ settings via companion app, and memory foam cushion comfort.',
-    price: { currency: 'GBP', amountMinor: 24999 },
+    price: { currency: 'INR', amountMinor: 24999 },
     thumbnail: {
       url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',
       alt: 'Wireless Noise-Cancelling Headphones',
@@ -119,7 +119,7 @@ const MOCK_INITIAL_CATALOG: readonly Product[] = [
     categoryId: 'cat-2',
     summary: 'WQHD 3440x1440 144Hz curved display with USB-C 90W power delivery.',
     description: 'Expand your workstation with crisp 1500R curvature, HDR400 color precision, and single-cable USB-C docking with 90W laptop charging.',
-    price: { currency: 'GBP', amountMinor: 69999, compareAtMinor: 79999 },
+    price: { currency: 'INR', amountMinor: 69999, compareAtMinor: 79999 },
     thumbnail: {
       url: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=600&q=80',
       alt: 'Ultra-Wide 34 Curved Monitor',
@@ -154,7 +154,7 @@ const MOCK_INITIAL_CATALOG: readonly Product[] = [
     categoryId: 'cat-2',
     summary: 'Hot-swappable tactile key switches with per-key RGB backlighting.',
     description: 'Features hot-swappable mechanical switches, PBT double-shot keycaps, sound dampening foam, and full N-key rollover.',
-    price: { currency: 'GBP', amountMinor: 12999 },
+    price: { currency: 'INR', amountMinor: 12999 },
     thumbnail: {
       url: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=600&q=80',
       alt: 'Mechanical Tactile Keyboard',
@@ -190,7 +190,7 @@ export interface SaveProductPayload {
   readonly brandId: string;
   readonly priceAmount: number;
   readonly compareAtPrice?: number | null;
-  readonly currency: 'GBP' | 'EUR' | 'USD';
+  readonly currency: CurrencyCode;
   readonly availableStock: number;
   readonly stockStatus: StockStatus;
   readonly summary: string;

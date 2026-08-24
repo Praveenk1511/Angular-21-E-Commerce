@@ -1,6 +1,6 @@
 import type { Page, SortDirection } from './api.model';
 
-export type CurrencyCode = 'GBP' | 'EUR' | 'USD';
+export type CurrencyCode = 'INR' | 'GBP' | 'EUR' | 'USD';
 
 /**
  * A monetary amount.

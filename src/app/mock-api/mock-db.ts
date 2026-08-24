@@ -32,10 +32,10 @@ import {
 import { roundMinor } from './mock-api.utils';
 
 /** Store currency. A multi-currency catalogue is out of scope for the mock. */
-const CURRENCY = 'GBP' as const;
+const CURRENCY = 'INR' as const;
 
-/** UK retail prices include VAT at 20%, so tax is 1/6 of the gross total. */
-const VAT_DIVISOR = 6;
+/** Retail prices include GST at 18%, tax calculated for breakdown. */
+const GST_DIVISOR = 6.55;
 
 /** How recently a product must have been added to earn the "new" badge. */
 const NEW_PRODUCT_DAYS = 120;
@@ -161,6 +161,18 @@ function deriveStatus(available: number, reorderLevel: number): StockStatus {
 
 /** Image URLs are generated from the slug; binary assets are not part of the mock. */
 function imagesFor(seed: ProductSeed): readonly ProductImage[] {
+  if (seed.slug.includes('chair')) {
+    return [
+      { url: '/images/chair.jpg', alt: `${seed.name}, ergonomic mesh design` },
+      { url: '/images/chair.jpg', alt: `${seed.name}, angle view` },
+    ];
+  }
+  if (seed.slug.includes('headphone') || seed.slug.includes('anc') || seed.slug.includes('audio')) {
+    return [
+      { url: '/images/headphones.jpg', alt: `${seed.name}, wireless Over-Ear studio view` },
+      { url: '/images/headphones.jpg', alt: `${seed.name}, memory foam detail` },
+    ];
+  }
   return [
     { url: `/images/products/${seed.slug}-front.webp`, alt: `${seed.name}, front view` },
     { url: `/images/products/${seed.slug}-angle.webp`, alt: `${seed.name}, three-quarter view` },
@@ -417,7 +429,7 @@ function toOrderTotals(seed: OrderSeed, lines: readonly OrderLine[]): OrderTotal
     subtotalMinor,
     discountMinor: seed.discountMinor,
     shippingMinor: seed.shippingMinor,
-    taxMinor: roundMinor(grandTotalMinor / VAT_DIVISOR),
+    taxMinor: roundMinor(grandTotalMinor / GST_DIVISOR),
     grandTotalMinor,
   };
 }

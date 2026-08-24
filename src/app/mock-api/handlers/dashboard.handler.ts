@@ -62,7 +62,7 @@ export function createDashboardRoutes(): readonly MockRoute[] {
         const previous = withinWindow(orders, previousFrom, currentFrom);
 
         const stats: DashboardStats = {
-          currency: 'GBP',
+          currency: 'INR',
           revenueMinor: delta(revenue(current), revenue(previous)),
           orderCount: delta(current.length, previous.length),
           averageOrderValueMinor: delta(averageOrderValue(current), averageOrderValue(previous)),

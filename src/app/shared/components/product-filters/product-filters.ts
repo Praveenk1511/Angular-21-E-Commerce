@@ -69,11 +69,11 @@ export class ProductFilters {
     const minP = this.minPrice();
     const maxP = this.maxPrice();
     if (minP !== null && maxP !== null) {
-      chips.push({ id: 'price-range', type: 'price', label: `Price: £${minP} - £${maxP}`, value: null });
+      chips.push({ id: 'price-range', type: 'price', label: `Price: ₹${minP} - ₹${maxP}`, value: null });
     } else if (minP !== null) {
-      chips.push({ id: 'price-min', type: 'price', label: `Price: >= £${minP}`, value: null });
+      chips.push({ id: 'price-min', type: 'price', label: `Price: >= ₹${minP}`, value: null });
     } else if (maxP !== null) {
-      chips.push({ id: 'price-max', type: 'price', label: `Price: <= £${maxP}`, value: null });
+      chips.push({ id: 'price-max', type: 'price', label: `Price: <= ₹${maxP}`, value: null });
     }
 
     const rating = this.minRating();

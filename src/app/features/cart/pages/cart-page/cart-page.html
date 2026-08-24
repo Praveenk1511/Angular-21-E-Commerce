@@ -42,7 +42,7 @@
         } @else {
           <div class="free-shipping-bar__progress-text">
             Add
-            <strong>{{ cart.freeShippingRemainingMinor() | price: cart.cartItems()[0]?.price?.currency || 'GBP' }}</strong>
+            <strong>{{ cart.freeShippingRemainingMinor() | price: cart.cartItems()[0]?.price?.currency || 'INR' }}</strong>
             more to unlock <strong>FREE Shipping</strong>!
           </div>
           <div class="free-shipping-bar__track">
@@ -159,9 +159,9 @@
             </div>
 
             <div class="order-summary-card__row">
-              <span class="order-summary-card__label">Estimated Tax (20% VAT)</span>
+              <span class="order-summary-card__label">Estimated Tax (18% GST)</span>
               <span class="order-summary-card__value">
-                {{ cart.taxMinor() | price: cart.cartItems()[0]?.price?.currency || 'GBP' }}
+                {{ cart.taxMinor() | price: cart.cartItems()[0]?.price?.currency || 'INR' }}
               </span>
             </div>
 

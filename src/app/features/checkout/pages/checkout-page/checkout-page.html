@@ -35,7 +35,7 @@
             </div>
             <div class="success-detail-row">
               <span class="success-detail-row__label">Amount Paid:</span>
-              <strong class="success-detail-row__value">{{ result.totalMinor | price: 'GBP' }}</strong>
+              <strong class="success-detail-row__value">{{ result.totalMinor | price: 'INR' }}</strong>
             </div>
           </div>
 
@@ -304,7 +304,7 @@
                         @if (opt.priceMinor === 0) {
                           <span class="delivery-card__free-badge">FREE</span>
                         } @else {
-                          <span class="delivery-card__price">{{ opt.priceMinor | price: 'GBP' }}</span>
+                          <span class="delivery-card__price">{{ opt.priceMinor | price: 'INR' }}</span>
                         }
                       </div>
                     </div>
@@ -635,7 +635,7 @@
                     <app-spinner [size]="20" [label]="'Processing Payment...'" />
                     <span>Processing Payment...</span>
                   } @else {
-                    <span>Pay {{ checkoutStore.checkoutTotalMinor() | price: 'GBP' }}</span>
+                    <span>Pay {{ checkoutStore.checkoutTotalMinor() | price: 'INR' }}</span>
                     <app-icon name="check-circle" [size]="18" />
                   }
                 </button>
@@ -673,13 +673,13 @@
           <div class="checkout-order-summary__rows">
             <div class="checkout-order-summary__row">
               <span>Subtotal</span>
-              <span>{{ cartStore.subtotalMinor() | price: 'GBP' }}</span>
+              <span>{{ cartStore.subtotalMinor() | price: 'INR' }}</span>
             </div>
 
             @if (cartStore.discountMinor() > 0) {
               <div class="checkout-order-summary__row checkout-order-summary__row--success">
                 <span>Savings</span>
-                <span>-{{ cartStore.discountMinor() | price: 'GBP' }}</span>
+                <span>-{{ cartStore.discountMinor() | price: 'INR' }}</span>
               </div>
             }
 
@@ -689,21 +689,21 @@
                 @if (checkoutStore.deliveryPriceMinor() === 0) {
                   <strong class="text-success">FREE</strong>
                 } @else {
-                  {{ checkoutStore.deliveryPriceMinor() | price: 'GBP' }}
+                  {{ checkoutStore.deliveryPriceMinor() | price: 'INR' }}
                 }
               </span>
             </div>
 
             <div class="checkout-order-summary__row">
-              <span>Estimated Tax (20% VAT)</span>
-              <span>{{ cartStore.taxMinor() | price: 'GBP' }}</span>
+              <span>Estimated Tax (18% GST)</span>
+              <span>{{ cartStore.taxMinor() | price: 'INR' }}</span>
             </div>
 
             <div class="checkout-order-summary__divider"></div>
 
             <div class="checkout-order-summary__row checkout-order-summary__row--total">
               <span>Grand Total</span>
-              <span>{{ checkoutStore.checkoutTotalMinor() | price: 'GBP' }}</span>
+              <span>{{ checkoutStore.checkoutTotalMinor() | price: 'INR' }}</span>
             </div>
           </div>
         </aside>

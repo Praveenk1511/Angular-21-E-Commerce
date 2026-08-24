@@ -70,8 +70,8 @@ export class CartStore {
     return FREE_SHIPPING_THRESHOLD_MINOR - subtotal;
   });
 
-  /** Estimated tax (20% VAT included). */
-  readonly taxMinor = computed(() => Math.round(this.subtotalMinor() * 0.2));
+  /** Estimated tax (18% GST included). */
+  readonly taxMinor = computed(() => Math.round(this.subtotalMinor() * 0.18));
 
   /** Grand total in minor units (subtotal + shipping). */
   readonly totalMinor = computed(() => this.subtotalMinor() + this.shippingMinor());

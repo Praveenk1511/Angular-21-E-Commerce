@@ -20,8 +20,8 @@ export class CustomerBenefits {
   protected readonly benefits: readonly Benefit[] = [
     {
       icon: 'cart',
-      title: 'Free delivery over £50',
-      description: 'Standard shipping at no cost on orders above £50.',
+      title: 'Free delivery over ₹50',
+      description: 'Standard shipping at no cost on orders above ₹50.',
     },
     {
       icon: 'check-circle',

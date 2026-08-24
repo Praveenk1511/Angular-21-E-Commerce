@@ -239,7 +239,7 @@ export class CouponStore {
       kind: payload.kind,
       description: payload.description.trim(),
       value: valueNum,
-      currency: 'GBP',
+      currency: 'INR',
       minimumSpendMinor: minSpendMinor,
       maximumDiscountMinor: maxDiscountMinor,
       startsAt: payload.startsAt ? new Date(payload.startsAt).toISOString() : new Date().toISOString(),

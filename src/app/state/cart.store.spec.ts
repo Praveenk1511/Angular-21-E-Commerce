@@ -13,7 +13,7 @@ describe('CartStore', () => {
     brandId: 'b-1',
     categoryId: 'c-1',
     summary: 'Great chair',
-    price: { amountMinor: 25000, compareAtMinor: 30000, currency: 'GBP' },
+    price: { amountMinor: 25000, compareAtMinor: 30000, currency: 'INR' },
     thumbnail: { url: '/thumb.png', alt: 'Chair' },
     rating: { average: 5, count: 10, distribution: [0, 0, 0, 0, 10] },
     stock: { status: 'in-stock', available: 10 },
