@@ -111,6 +111,15 @@ export const routes: Routes = [
         path: SEGMENTS.profile,
         loadChildren: () => import('@features/profile/profile.routes').then((m) => m.PROFILE_ROUTES),
       },
+      {
+        path: SEGMENTS.notifications,
+        title: 'Your notifications',
+        data: { breadcrumb: 'Notifications' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('@features/notifications/pages/notifications-page/notifications-page').then(
+            (m) => m.NotificationsPage,
+          ),
+      },
 
       /* Static content pages linked from the footer. */
       ...INFO_ROUTES,

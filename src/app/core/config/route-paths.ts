@@ -19,6 +19,7 @@ export const SEGMENTS = {
   checkout: 'checkout',
   orders: 'orders',
   profile: 'profile',
+  notifications: 'notifications',
 
   // Auth area
   auth: 'auth',
@@ -63,6 +64,7 @@ export const APP_URLS = {
   orders: `/${SEGMENTS.orders}`,
   orderDetail: (id: string): string => `/${SEGMENTS.orders}/${id}`,
   profile: `/${SEGMENTS.profile}`,
+  notifications: `/${SEGMENTS.notifications}`,
 
   auth: {
     login: `/${SEGMENTS.auth}/${SEGMENTS.login}`,

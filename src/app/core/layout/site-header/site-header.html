@@ -17,7 +17,7 @@
     <app-site-search class="site-header__search" />
 
     <ul class="site-header__actions" role="list">
-      <!-- Account action: reactive to auth state -->
+      <!-- Account action -->
       <li>
         @if (auth.isAuthenticated()) {
           <a
@@ -42,6 +42,96 @@
         }
       </li>
 
+      <!-- Notification Bell with Dropdown Overlay -->
+      <li class="notification-nav-item">
+        <button
+          type="button"
+          class="site-header__action"
+          (click)="notifications.toggleDropdown()"
+          [attr.aria-expanded]="notifications.isDropdownOpen()"
+          aria-label="Notifications"
+        >
+          <span class="site-header__action-icon-wrapper">
+            <app-icon name="info" [size]="21" />
+            @if (notifications.unreadCount() > 0) {
+              <span class="site-header__cart-badge site-header__cart-badge--notif">
+                {{ notifications.unreadCount() }}
+              </span>
+            }
+          </span>
+          <span class="site-header__action-label">Alerts</span>
+        </button>
+
+        <!-- Dropdown Menu Panel -->
+        @if (notifications.isDropdownOpen()) {
+          <div class="notification-dropdown" (click)="$event.stopPropagation()">
+            <header class="notification-dropdown__header">
+              <div class="notification-dropdown__title-row">
+                <strong class="notification-dropdown__title">Notifications</strong>
+                @if (notifications.unreadCount() > 0) {
+                  <span class="notification-dropdown__badge">
+                    {{ notifications.unreadCount() }} unread
+                  </span>
+                }
+              </div>
+
+              @if (notifications.unreadCount() > 0) {
+                <button
+                  type="button"
+                  class="notification-dropdown__action-btn"
+                  (click)="notifications.markAllAsRead()"
+                >
+                  Mark all as read
+                </button>
+              }
+            </header>
+
+            <div class="notification-dropdown__body">
+              @if (notifications.totalCount() === 0) {
+                <div class="notification-dropdown__empty">
+                  <app-icon name="info" [size]="24" />
+                  <p>You have no notifications at this time.</p>
+                </div>
+              } @else {
+                <ul class="notification-dropdown__list" role="list">
+                  @for (n of notifications.notifications().slice(0, 4); track n.id) {
+                    <li
+                      class="notification-item"
+                      [class.notification-item--unread]="!n.readAt"
+                      (click)="notifications.markAsRead(n.id); notifications.closeDropdown()"
+                    >
+                      <div class="notification-item__icon">
+                        <app-icon [name]="getKindIcon(n.kind)" [size]="16" />
+                      </div>
+
+                      <div class="notification-item__content">
+                        <div class="notification-item__top">
+                          <strong class="notification-item__title">{{ n.title }}</strong>
+                          <span class="notification-item__time">{{ n.createdAt | date: 'shortTime' }}</span>
+                        </div>
+                        <p class="notification-item__text">{{ n.body }}</p>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+
+            <footer class="notification-dropdown__footer">
+              <a
+                [routerLink]="notificationsUrl"
+                class="notification-dropdown__view-all"
+                (click)="notifications.closeDropdown()"
+              >
+                View all notifications
+                <app-icon name="chevron-right" [size]="14" />
+              </a>
+            </footer>
+          </div>
+        }
+      </li>
+
+      <!-- Wishlist & Cart -->
       @for (action of utilityActions; track action.id) {
         <li>
           <a
@@ -64,7 +154,7 @@
         </li>
       }
 
-      <!-- Logout: shown only when signed in -->
+      <!-- Logout -->
       @if (auth.isAuthenticated()) {
         <li>
           <button class="site-header__action" type="button" (click)="logout()">

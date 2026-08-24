@@ -1,4 +1,4 @@
-export type NotificationKind = 'order' | 'stock' | 'price-drop' | 'account' | 'system';
+export type NotificationKind = 'order' | 'payment' | 'account' | 'promotion' | 'system' | 'stock' | 'price-drop';
 
 export type NotificationSeverity = 'info' | 'success' | 'warning' | 'error';
 

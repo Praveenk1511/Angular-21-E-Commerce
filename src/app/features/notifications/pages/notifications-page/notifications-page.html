@@ -1,0 +1,136 @@
+<app-page-container>
+  <div class="notifications-page">
+    <header class="notifications-page__header">
+      <div class="notifications-page__title-group">
+        <h1 class="notifications-page__title">Notifications</h1>
+        @if (notificationStore.unreadCount() > 0) {
+          <app-badge variant="brand" size="md">
+            {{ notificationStore.unreadCount() }} unread
+          </app-badge>
+        }
+      </div>
+
+      <div class="notifications-page__header-actions">
+        @if (notificationStore.unreadCount() > 0) {
+          <button type="button" appButton variant="secondary" size="sm" (click)="markAllAsRead()">
+            <app-icon name="check" [size]="16" />
+            Mark All as Read
+          </button>
+        }
+
+        <button type="button" appButton variant="secondary" size="sm" (click)="clearAllRead()">
+          Clear Read
+        </button>
+      </div>
+    </header>
+
+    @if (notificationStore.totalCount() === 0) {
+      <div class="notifications-page__empty">
+        <app-empty-state
+          [heading]="'No notifications yet'"
+          [description]="'Alerts regarding order updates, payment confirmations, and promos will appear here.'"
+        />
+      </div>
+    } @else {
+      <!-- Filter Tabs Bar -->
+      <nav class="notif-tabs" aria-label="Notification Filter Tabs">
+        <button
+          type="button"
+          class="notif-tab"
+          [class.notif-tab--active]="activeTab() === 'all'"
+          (click)="setTab('all')"
+        >
+          All ({{ notificationStore.totalCount() }})
+        </button>
+        <button
+          type="button"
+          class="notif-tab"
+          [class.notif-tab--active]="activeTab() === 'unread'"
+          (click)="setTab('unread')"
+        >
+          Unread ({{ notificationStore.unreadCount() }})
+        </button>
+        <button
+          type="button"
+          class="notif-tab"
+          [class.notif-tab--active]="activeTab() === 'orders'"
+          (click)="setTab('orders')"
+        >
+          Orders & Payments
+        </button>
+        <button
+          type="button"
+          class="notif-tab"
+          [class.notif-tab--active]="activeTab() === 'promotions'"
+          (click)="setTab('promotions')"
+        >
+          Promos & System
+        </button>
+      </nav>
+
+      @if (filteredNotifications().length === 0) {
+        <div class="notifications-page__no-match">
+          <p>No notifications match the selected filter.</p>
+          <button type="button" appButton variant="secondary" size="sm" (click)="setTab('all')">
+            Show All Notifications
+          </button>
+        </div>
+      } @else {
+        <div class="notif-grid" role="list">
+          @for (n of filteredNotifications(); track n.id) {
+            <article
+              class="notif-card"
+              [class.notif-card--unread]="!n.readAt"
+              role="listitem"
+            >
+              <div class="notif-card__icon-wrapper">
+                <app-icon [name]="getKindIcon(n.kind)" [size]="20" />
+              </div>
+
+              <div class="notif-card__content">
+                <div class="notif-card__top">
+                  <div class="notif-card__title-row">
+                    <h3 class="notif-card__title">{{ n.title }}</h3>
+                    <app-badge [variant]="getKindVariant(n.kind)" size="sm">
+                      {{ n.kind }}
+                    </app-badge>
+                  </div>
+                  <span class="notif-card__time">{{ n.createdAt | date: 'medium' }}</span>
+                </div>
+
+                <p class="notif-card__body">{{ n.body }}</p>
+
+                <div class="notif-card__actions">
+                  @if (n.actionUrl) {
+                    <a [routerLink]="n.actionUrl" appButton variant="secondary" size="sm" (click)="markAsRead(n.id)">
+                      View Details
+                      <app-icon name="chevron-right" [size]="14" />
+                    </a>
+                  }
+
+                  @if (!n.readAt) {
+                    <button
+                      type="button"
+                      class="notif-card__action-btn"
+                      (click)="markAsRead(n.id)"
+                    >
+                      Mark as Read
+                    </button>
+                  }
+
+                  <button
+                    type="button"
+                    class="notif-card__action-btn notif-card__action-btn--danger"
+                    (click)="deleteNotification(n.id)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+  </div>
+</app-page-container>
