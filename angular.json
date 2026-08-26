@@ -37,14 +37,14 @@
             },
             "define": {
               "ngDevDesignSystem": "true",
-              "ngUseMockApi": "true"
+              "ngUseMockApi": "false"
             }
           },
           "configurations": {
             "production": {
               "define": {
                 "ngDevDesignSystem": "false",
-                "ngUseMockApi": "true"
+                "ngUseMockApi": "false"
               },
               "budgets": [
                 {
@@ -76,6 +76,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "ecommerce:build:production"
